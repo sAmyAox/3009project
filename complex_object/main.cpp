@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 {
 	Solution sol;
 	int posX = 100, posY= 10;	// windows position
-	int winWidth = 300, winHeight = 300;	// window size
+	int winWidth = 600, winHeight = 600;	// window size
 
 	sol.initOpenGL(argc, argv, posX, posY, winWidth, winHeight);
 	sol.initSolution();

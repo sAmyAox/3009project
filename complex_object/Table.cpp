@@ -1,28 +1,19 @@
-#include "Cube.h"
+#include  "Table.h"
 
-
-
-
-void Cube::initGeom() //model to model
-{
-
-
-    m_vertices.resize(8);
+void Table::initGeom() {
+	m_vertices.resize(8);
     // initial each vertex with a positin and colour
-    m_vertices[0] = Vertex(Vector4f(-1, -1, 1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[1] = Vertex(Vector4f(1, -1, 1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[2] = Vertex(Vector4f(1, 1, 1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[3] = Vertex(Vector4f(-1, 1, 1, 1), Vector4f(1, 0, 0, 1));
+    m_vertices[0] = Vertex(Vector4f(-1, -1, 1, 1),      Vector4f(0, 1, 1, 1));
+    m_vertices[1] = Vertex(Vector4f(1, -1, 1, 1),       Vector4f(0, 1, 1, 1));
+    m_vertices[2] = Vertex(Vector4f(1, 1, 1, 1),        Vector4f(0, 1, 1, 1));
+    m_vertices[3] = Vertex(Vector4f(-1, 1, 1, 1),      Vector4f(0, 1, 1, 1));
 
-    m_vertices[4] = Vertex(Vector4f(-1, -1, -1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[5] = Vertex(Vector4f(1, -1, -1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[6] = Vertex(Vector4f(1, 1, -1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[7] = Vertex(Vector4f(-1, 1, -1, 1), Vector4f(1, 0, 0, 1));
+    m_vertices[4] = Vertex(Vector4f(-1, -1, -1, 1),    Vector4f(0, 1, 1, 1));
+    m_vertices[5] = Vertex(Vector4f(1, -1, -1, 1),     Vector4f(0, 1, 1, 1));
+    m_vertices[6] = Vertex(Vector4f(1, 1, -1, 1),       Vector4f(0, 1, 1, 1));
+    m_vertices[7] = Vertex(Vector4f(-1, 1, -1, 1),      Vector4f(0, 1, 1, 1));
 
-    // set the colours
-
-
-    m_indices.resize(36);
+     m_indices.resize(36);
     int indices[] = {
         // front face
         0, 1, 2,
@@ -48,23 +39,14 @@ void Cube::initGeom() //model to model
     m_indices.assign(std::begin(indices), std::end(indices));
 }
 
-
-
-
-
-
-/**************************************************************************************/
-
-// Render the Cube
-
-int Cube::render(Matrix4f parentWorldMat)
+int Table::render(Matrix4f parentWorldMat)
 {
     int i, j;
 
     Matrix4f worldMat;	// world matrix
     Vector4f p;
-    
-    
+
+
     worldMat = parentWorldMat * this->worldMat * modelMat;
 
     glColor3f(1, 0, 0);
@@ -92,17 +74,16 @@ int Cube::render(Matrix4f parentWorldMat)
 
 /*********************************************************************/
 
-void Cube::update()
+void Table::update()
 
 {
     int i;
 
     // render any children
-    /*
     incrementModelRotations(0, 1, 1);
     for (int i = 0; i < m_children.size(); i++) {
-        m_children[i]->incrementModelRotations(0, (i & 1) ?0 : 2, (i&1)?2:0);
+        m_children[i]->incrementModelRotations(0, (i & 1) ? 0 : 2, (i & 1) ? 2 : 0);
     }
-    */
+
 
 }

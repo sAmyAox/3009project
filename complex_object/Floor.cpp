@@ -9,15 +9,15 @@ void Floor::initGeom()
 
     m_vertices.resize(8);
     // initial each vertex with a positin and colour
-    m_vertices[0] = Vertex(Vector4f(-1, -1, 1, 1), Vector4f(1, 0, 0, 1));
-    m_vertices[1] = Vertex(Vector4f(1, -1, 1, 1), Vector4f(0, 1, 0, 1));
-    m_vertices[2] = Vertex(Vector4f(1, 1, 1, 1), Vector4f(0, 0, 1, 1));
-    m_vertices[3] = Vertex(Vector4f(-1, 1, 1, 1), Vector4f(1, 1, 0, 1));
+    m_vertices[0] = Vertex(Vector4f(-1, -1, 1, 1), Vector4f(0.5, 0.35, 0.05, 1));
+    m_vertices[1] = Vertex(Vector4f(1, -1, 1, 1), Vector4f(0.5, 0.35, 0.05, 1));
+    m_vertices[2] = Vertex(Vector4f(1, 1, 1, 1), Vector4f(0.5, 0.35, 0.05, 1));
+    m_vertices[3] = Vertex(Vector4f(-1, 1, 1, 1), Vector4f(0.5, 0.35, 0.05, 1));
 
-    m_vertices[4] = Vertex(Vector4f(-1, -1, -1, 1), Vector4f(1, 0, 1, 1));
-    m_vertices[5] = Vertex(Vector4f(1, -1, -1, 1), Vector4f(0, 1, 1, 1));
-    m_vertices[6] = Vertex(Vector4f(1, 1, -1, 1), Vector4f(0.5, 0.5, 0, 1));
-    m_vertices[7] = Vertex(Vector4f(-1, 1, -1, 1), Vector4f(0.5, 0, 0.5, 1));
+    m_vertices[4] = Vertex(Vector4f(-1, -1, -1, 1), Vector4f(0.5, 0.35, 0.05, 1));
+    m_vertices[5] = Vertex(Vector4f(1, -1, -1, 1), Vector4f(0.5, 0.35, 0.05, 1));
+    m_vertices[6] = Vertex(Vector4f(1, 1, -1, 1), Vector4f(0.5, 0.35, 0.05, 1));
+    m_vertices[7] = Vertex(Vector4f(-1, 1, -1, 1), Vector4f(0.5, 0.35, 0.05, 1));
 
     // set the colours
 
@@ -110,9 +110,10 @@ void Floor::update()
 
     // render any children
     //incrementModelRotations(1, 1, 0);
+    /*
     for (int i = 0; i < m_children.size(); i++) {
         m_children[i]->incrementModelRotations(0, (i & 1) ?0 : 2, (i&1)?2:0);
     }
-
+    */
 
 }

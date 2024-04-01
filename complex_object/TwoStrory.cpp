@@ -12,30 +12,37 @@ void TwoStory::create()
 	firstFloor.initGeom();
 	// set the first floor geometry (modelScale wrt the x,y and z axis)
 
-	firstFloor.setModelScale(20, 5, 5);
+	firstFloor.setModelScale(30, 3, 20);
 	// set the scale of the first floor
 
 	firstFloor.setWorldPosition(Vector3f(10, 0, 10));
 	// set the world position of the first floor
 
 
-			// create the second floor 
+	// create the second floor 
 	//Floor apt1;
 	// create the second floor apt1;
 
-	apt1.initGeom();
+	//apt1.initGeom();
 	// initialize the geometry
 
-	apt1.setModelScale(2, 2, 2);
+	//apt1.setModelScale(1, 5, 1);
 	// set the scale
 
-	apt1.setWorldPosition(Vector3f(-15,8,0));
+	//apt1.setWorldPosition(Vector3f(0,4,0));
 	// position the apt1 with respect to the ground floor
 
-	firstFloor.addChild(&apt1);
+	//firstFloor.addChild(&apt1);
 	// add the apt1 as a child of the first floor
 
-		
+	candle.initGeom();
+	candle.setModelScale(1, 5, 1);
+	candle.setWorldPosition(Vector3f(0, 8, 0));
+	firstFloor.addChild(&candle);
+
+
+
+		/*
 	//Floor apt2;
 	// create the second floor apt2;
 
@@ -48,6 +55,7 @@ void TwoStory::create()
 
 	firstFloor.addChild(&apt2);
 	// add the apt2 as a child of the first floor
+	*/
 
 }
 

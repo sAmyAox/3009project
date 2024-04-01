@@ -34,6 +34,7 @@
 //=============================================================================
 #include "graphicsObject.h"
 #include "Floor.h"
+#include "Cube.h"
 
 class TwoStory : public GraphicsObject
 {
@@ -48,6 +49,7 @@ private:
 	Floor secondFloor;		
 	Floor apt1;
 	Floor apt2;
+	Cube candle;
 
 };
 

@@ -48,6 +48,7 @@
 #include "Cube.h"
 #include "TwoStory.h"
 #include "camera.h"
+#include "Table.h"
 
 
 
@@ -85,6 +86,7 @@ private:
 	static Solution* sol;
 	Cube floor;
 	TwoStory house;
+	Table table;
 	int perspective;
 
 	int winWidth, winHeight;
