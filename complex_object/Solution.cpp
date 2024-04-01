@@ -231,16 +231,16 @@ int Solution::initSolution()
 	// world position and scale
 	//floor.setInitModel();
 
-	floor.initGeom();
-	floor.setModelScale(15, 5, 5);//model to model
+	//floor.initGeom();
+	//floor.setModelScale(15, 5, 5);//model to model
 	//i'm not sure if this should be (5,5,5)because the figure 2 looks like it is a cube , not rectangular
-	floor.setModelPosition(10, 20, 0);//model to model
+	//floor.setModelPosition(10, 20, 0);//model to model
 
 
 	// create the house by invoking the house create function
 
-	//house.create();
-	//house.setModelPosition(10, 10, 0);
+	house.create();
+	house.setModelPosition(10, 10, 0);
 	//house.initGeom();
 
 
