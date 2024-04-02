@@ -61,6 +61,8 @@ public:
 	Vector3f moveBackward(float numUnits);  // moves the camera backward numUnits units along the lookAtVector
 	Vector3f moveRight(float numUnits);
 	Vector3f moveLeft(float numUnits);
+	Vector3f moveUpward(float numUnits);
+	Vector3f moveDownward(float numUnits);
 	//void setCamera(Vector4f position, Vector4f lookAtPoint, Vector4f upVector); // DN 26/10/2015
 	int updateSpeed(float speed);
 	int changeLookAtVector(float x, float y, float z);

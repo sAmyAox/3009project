@@ -357,10 +357,10 @@ void Solution::keyboard(unsigned char key, int x, int y)
 		cam.moveBackward(NORMAL_SPEED * factor);
 		break;
 	case 'a':
-		cam.yaw((float).2 * factor);
+		cam.yaw((float).5 * factor);
 		break;
 	case 'd':
-		cam.yaw((float)-.2 * factor);
+		cam.yaw((float)-.5 * factor);
 		break;
 	case 'g':
 		cam.moveRight(NORMAL_SPEED * factor);
@@ -379,9 +379,14 @@ void Solution::keyboard(unsigned char key, int x, int y)
 		break;
 	case '1':
 		//cam.updateOrientation();
+		//cam.changeLookAtVector(cam.getLookAtPoint().x, cam.getLookAtPoint().y+1, cam.getLookAtPoint().z);
 		break;
 	case '2':
+		cam.moveUpward(NORMAL_SPEED * factor);
+		break;
 	case '3':
+		cam.moveBackward(NORMAL_SPEED * factor);
+		break;
 	case '4':
 	case '5':
 	case '6':
@@ -411,16 +416,16 @@ void Solution::specialKeyboard(int key, int x, int y)
 		exit(1);
 		break;
 	case GLUT_KEY_LEFT:
-		cam.roll((float).2 * factor);
+		cam.roll((float).5 * factor);
 		break;
 	case GLUT_KEY_UP:
-		cam.pitch((float).2 * factor);
+		cam.pitch((float).5 * factor);
 		break;
 	case GLUT_KEY_RIGHT:
-		cam.roll((float)-.2 * factor);
+		cam.roll((float)-.5 * factor);
 		break;
 	case GLUT_KEY_DOWN:
-		cam.pitch((float)-.2 * factor);
+		cam.pitch((float)-.5 * factor);
 		break;
 	}
 }

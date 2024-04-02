@@ -353,7 +353,15 @@ Vector3f Camera::moveForward(float numUnits)
 	return (position);	// DN 26/10/2015
 }
 
+Vector3f Camera::moveUpward(float numUnits) {
+	position.y += 1 * numUnits;
+	viewMat - Matrix4f::cameraMatrix(position, lookAtVector, upVector);
 
+	return position;
+}
+Vector3f Camera::moveDownward(float numUnits) {
+	return (moveUpward(-numUnits));
+}
 
 /******************************************************************/
 /*
