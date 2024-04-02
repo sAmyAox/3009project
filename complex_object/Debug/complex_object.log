@@ -1,33 +1,7 @@
-﻿  camera.cpp
-E:\Download\3009project-main\complex_object\camera.cpp(57,22): warning C4305: 'initializing': truncation from 'double' to 'float'
-  cube.cpp
-E:\Download\3009project-main\complex_object\cube.cpp(73,19): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\cube.cpp(84,23): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\cube.cpp(102,23): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\cube.cpp(103,69): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Download\3009project-main\complex_object\cube.cpp(103,54): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Download\3009project-main\complex_object\cube.cpp(98,9): warning C4101: 'i': unreferenced local variable
-  Floor.cpp
-E:\Download\3009project-main\complex_object\Floor.cpp(80,19): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\Floor.cpp(92,23): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\Floor.cpp(113,23): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\Floor.cpp(114,69): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Download\3009project-main\complex_object\Floor.cpp(114,54): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-E:\Download\3009project-main\complex_object\Floor.cpp(109,9): warning C4101: 'i': unreferenced local variable
-  main.cpp
-E:\Download\3009project-main\complex_object\Solution.h(47,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-  (compiling source file 'main.cpp')
-  
-  graphicsObject.cpp
-  Solution.cpp
-E:\Download\3009project-main\complex_object\Solution.h(47,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+﻿  Solution.cpp
+E:\Download\3009project-main (1)\3009project-main\complex_object\Solution.h(47,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   (compiling source file 'Solution.cpp')
   
-E:\Download\3009project-main\complex_object\Solution.cpp(224,6): warning C4101: 'rc': unreferenced local variable
-  TwoStrory.cpp
-E:\Download\3009project-main\complex_object\TwoStrory.cpp(73,20): warning C4018: '<': signed/unsigned mismatch
-E:\Download\3009project-main\complex_object\TwoStrory.cpp(60,8): warning C4101: 'j': unreferenced local variable
-E:\Download\3009project-main\complex_object\TwoStrory.cpp(60,6): warning C4101: 'i': unreferenced local variable
-E:\Download\3009project-main\complex_object\TwoStrory.cpp(85,6): warning C4101: 'i': unreferenced local variable
-  Generating Code...
-  complex_object.vcxproj -> E:\Download\3009project-main\Debug\complex_object.exe
+E:\Download\3009project-main (1)\3009project-main\complex_object\Solution.cpp(224,6): warning C4101: 'rc': unreferenced local variable
+E:\Download\3009project-main (1)\3009project-main\complex_object\Solution.cpp(391,24): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+  complex_object.vcxproj -> E:\Download\3009project-main (1)\3009project-main\Debug\complex_object.exe

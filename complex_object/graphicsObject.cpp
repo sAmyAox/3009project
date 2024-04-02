@@ -65,14 +65,129 @@ GraphicsObject::~GraphicsObject()
 
 
 
+/***************************************************************************/
 
+
+
+int GraphicsObject::createVAO(Shader shader)
+{
+	return 0;
+}
+
+
+/***************************************************************************/
+
+
+int GraphicsObject::createVAO(Shader shader, Vertices vtx, Indices ind)
+{
+	int rc = 0;
+
+	GLint location;		// location of the attributes in the shader;
+
+	//create vertex array object
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	//create vertex buffer object
+	glGenBuffers(1, &vtxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, vtxVBO);
+	glBufferData(GL_ARRAY_BUFFER, vtx.size() * sizeof(Vertex), vtx.data(), GL_STATIC_DRAW);
+
+	//set the vertex position
+	location = glGetAttribLocation(shader.getProgId(), "vtxPos");
+	if (location == -1) {
+		rc = -1;
+		goto err;
+	}
+	glEnableVertexAttribArray(location);
+	glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+
+	//set the vertex color
+	location = glGetAttribLocation(shader.getProgId(), "vtxCol");
+	if (location == -1) {
+		//rc = -2;
+		//goto err;
+	}
+	else {
+		glEnableVertexAttribArray(location);
+		glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
+	}
+
+	//set the vertex normal
+	location = glGetAttribLocation(shader.getProgId(), "vtxNormal");
+	if (location == -1) {
+		rc = -3;
+		//DN	goto err;
+	}
+	else {
+		glEnableVertexAttribArray(location);
+		glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+	}
+	//create index buffer
+	glGenBuffers(1, &indVBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indVBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ind.size() * sizeof(GLuint), ind.data(), GL_STATIC_DRAW);
+	// store the number of indices
+	numIndices = ind.size();
+
+	//end creation
+	glBindVertexArray(0);
+
+err:
+	return(rc);
+}
+
+
+
+/*********************************************************************************/
+
+
+
+int GraphicsObject::loadMaterials(Shader shader)
+
+{
+	shader.copyFloatVectorToShader((float*)&materials.ambientMaterial, 1, 3, "gMaterial.ambientMaterial");
+	shader.copyFloatVectorToShader((float*)&materials.diffuseMaterial, 1, 3, "gMaterial.diffuseMaterial");
+	shader.copyFloatVectorToShader((float*)&materials.specularMaterial, 1, 3, "gMaterial.specularMaterial");
+	shader.copyFloatVectorToShader((float*)&materials.interalRadiation, 1, 3, "gMaterial.interalRadiation");
+
+	return(0);
+}
 
 /*********************************************************************************/
 
 
 int GraphicsObject::render()
 {
+#if 0
+	Matrix4f rotMat;  // rotation matrix;
+	Matrix4f scaleMat; // scaling matrix;
+	Matrix4f transMat;	// translation matrix
+	Matrix4f modelMat;	// final model matrix
 
+	// set the transformation matrix - the model transfomration
+	modelMat = Matrix4f::identity(); // = Matrix4f::rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+
+	// set the scaling - this is model space to model space transformation
+	scaleMat = Matrix4f::scale(scale.x, scale.y, scale.z);
+	modelMat = scaleMat * modelMat;
+
+	// set the rotation  - this is model space to model space transformation 
+	rotMat = Matrix4f::rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+	// note that we always multiply the new matrix on the left
+	modelMat = rotMat * modelMat;
+
+
+	// set the translation - this is model space to world space transformation
+	transMat = Matrix4f::translation(position);
+	modelMat = transMat * modelMat;
+
+
+	// draw using indices
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, NULL);
+
+
+#endif
 	return 0;
 }
 
@@ -81,7 +196,35 @@ int GraphicsObject::render()
 
 int GraphicsObject::render(Matrix4f worldMat)
 {
+#if 0
+	Matrix4f rotMat;  // rotation matrix;
+	Matrix4f scaleMat; // scaling matrix;
+	Matrix4f transMat;	// translation matrix
+	Matrix4f modelMat;	// final model matrix
 
+	// set the transformation matrix - the model transfomration
+	modelMat = Matrix4f::identity(); // = Matrix4f::rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+
+	// set the scaling - this is model space to model space transformation
+	scaleMat = Matrix4f::scale(scale.x, scale.y, scale.z);
+	modelMat = scaleMat * modelMat;
+
+	// set the rotation  - this is model space to model space transformation 
+	rotMat = Matrix4f::rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+	// note that we always multiply the new matrix on the left
+	modelMat = rotMat * modelMat;
+
+
+	// set the translation - this is model space to world space transformation
+	transMat = Matrix4f::translation(position);
+	modelMat = transMat * modelMat;
+
+
+	// draw using indices
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, NULL);
+
+
+#endif
 	return 0;
 }
 
@@ -125,7 +268,7 @@ void GraphicsObject::setWorldRotations(float rollAngle, float pitchAngle, float 
 
 void GraphicsObject::setWorldPosition(Vector3f position)
 {
-	this->worldPosition= position;
+	this->worldPosition = position;
 	computeWorldMat();
 }
 
@@ -207,6 +350,18 @@ void GraphicsObject::setModelScale(float scaleX, float scaleY, float scaleZ)
 	computeModelMat();
 }
 
+/*************************************************************************/
+
+// set the initial position
+
+void GraphicsObject::incrementModelScale(float scaleX, float scaleY, float scaleZ)
+{
+	this->scale.x += scaleX;
+	this->scale.y += scaleY;
+	this->scale.z += scaleZ;
+	computeModelMat();
+}
+
 
 /*************************************************************************/
 
@@ -272,7 +427,7 @@ void GraphicsObject::computeWorldMat()
 /*********************************************************************************/
 // adds a child to the list of chilren
 
-void GraphicsObject::addChild(GraphicsObject *obj)
+void GraphicsObject::addChild(GraphicsObject* obj)
 {
 
 	m_children.push_back(obj);

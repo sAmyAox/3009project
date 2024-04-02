@@ -93,15 +93,16 @@ Return:
 int Camera::roll(float angleDeg)
 {
 	Vector4f u;
-
-	// create rotation matrix
-
+	rotMat = Matrix4f::rotateVector(-lookAtVector, angleDeg, 1);
 	// rotate the camera (up vector and/or looAtVector)
+	u = rotMat * upVector;
+	upVector = u.to3D();
 
 
 
-	
 	// update the view matrix
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
+
 
 
 	return 0;
@@ -130,18 +131,21 @@ int Camera::pitch(float angleDeg)
 	rotVector = Vector3f::cross(lookAtVector, upVector);	// DN 26/10/2015
 
 	// create rotation matrix
-
+	rotMat = Matrix4f::rotateVector(rotVector, angleDeg, 1);
 
 	// rotate the up vector)
-
+	u = rotMat * upVector;
+	upVector = u.to3D();
 
 	// rotate the lookAtVector
-
+	u = rotMat * lookAtVector;
+	lookAtVector = u.to3D();
 	// update the view matrix
 	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
 
 	return 0;
 }
+
 
 /******************************************************************/
 /*
@@ -161,15 +165,15 @@ Return:
 int Camera::yaw(float angleDeg)
 {
 	Vector4f u;
-
-
-	// create rotation matrix around the upvector
-
+	// create rotation matrix
+	rotMat = Matrix4f::rotateVector(upVector, angleDeg, 1);
 
 	// rotate the lookAtVector
+	u = rotMat * lookAtVector;
+	lookAtVector = u.to3D();
 
 	// update the view matrix
-
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
 
 	return 0;
 }
@@ -246,10 +250,13 @@ Return:
 
 int Camera::changePositionDelta(float dx, float dy, float dz)
 {
-	// add code
-	// Update the position
-	
+	position.x += dx;
+	position.y += dy;
+	position.z += dz;
+
 	// update the view matrix
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
+
 
 	return 0;
 }
@@ -270,9 +277,9 @@ Return:
 
 int Camera::changePositionDelta(Vector3f *dv)
 {
-	// add code 	
-	
+	position += *dv;
 	// update the view matrix
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
 
 	return 0;
 }
@@ -292,10 +299,12 @@ Return:
 
 int Camera::changeAbsPosition(float x, float y, float z)
 {
+	position.x = x;
+	position.y = y;
+	position.z = z;
 
-	// add code
-	
 	// update the view matrix
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
 
 	return 0;
 }
@@ -314,7 +323,7 @@ Return:
 
 int Camera::changeAbsPosition(Vector3f *v)
 {
-
+	position = *v;
 	// update the view matrix
 	viewMat = Matrix4f::cameraMatrix(position, lookAtVector, upVector);
 
@@ -337,8 +346,9 @@ the new position
 Vector3f Camera::moveForward(float numUnits)
 {
 	//  update the position using the lookAtVector
-
+	position += lookAtVector * numUnits;
 	// update the view matrix
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
 
 	return (position);	// DN 26/10/2015
 }
@@ -363,7 +373,7 @@ Vector3f Camera::moveBackward(float numUnits)
 	// add code 
 
 	// return the new position
-	return(position);
+	return(moveForward(-numUnits));
 }
 
 
@@ -561,14 +571,12 @@ Vector3f Camera::moveRight(float numUnits)
 {
 	// compute the the moving direction
 	Vector3f moveVector;
-
-	// move vector is a cross product 
 	// moveVector = Vector3f::cross(upVector, lookAtVector);
+	moveVector = Vector3f::cross(lookAtVector, upVector);
+	position += moveVector * numUnits;
+	// updatre the view matrix
+	viewMat = Matrix4f::cameraMatrix(position, position + lookAtVector, upVector);
 
-
-	// update the position along the vector
-
-	// update the view matrix
 
 	return (position);	// DN 26/10/2015
 }
@@ -594,7 +602,7 @@ Vector3f Camera::moveLeft(float numUnits)
 {
 	// add code;
 
-	return(position);
+	return(this->moveRight(-numUnits));
 }
 
 
@@ -642,12 +650,8 @@ The camera is limited by how much it can change the field of view
 */
 int Camera::zoomIn(float zoom)
 {
-	// update the size of the field of view
-
-
-	// make sure that the field of view is not too small
-
-	// update the projection matrix
+	fieldOfView -= zoom;
+	if (fieldOfView < 10) fieldOfView = 10;
 	projMat = Matrix4f::symmetricPerspectiveProjectionMatrix(fieldOfView, aspectRatio, nearPlane, farPlane);
 	return 0;
 }
@@ -694,11 +698,9 @@ The camera is limited by how much it can change the field of view
 
 int Camera::zoomOut(float zoom)
 {
-	// update the size of the field of view
 
-
-	// make sure that the field of view is not too large
-
+	fieldOfView += zoom;
+	if (fieldOfView > 150) fieldOfView = 150;
 	// update the projection matrix
 	projMat = Matrix4f::symmetricPerspectiveProjectionMatrix(fieldOfView, aspectRatio, nearPlane, farPlane);
 	return 0;

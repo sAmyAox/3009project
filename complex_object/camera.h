@@ -72,9 +72,10 @@ public:
 	Matrix4f getProjectionMatrix(Matrix4f *projMatrix);
 
 	int setPerspectiveView(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
+	int updateOrientation(Vector3f rotVector, float angleRad); // update the camera's orientation in space // DN 26/10/2015
 
 private:
-	int updateOrientation(Vector3f rotVector, float angleRad); // update the camera's orientation in space // DN 26/10/2015
+	//int updateOrientation(Vector3f rotVector, float angleRad); // update the camera's orientation in space // DN 26/10/2015
 
 	
 

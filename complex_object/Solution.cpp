@@ -225,17 +225,12 @@ int Solution::initSolution()
 	Vertices vtx;
 	Indices ind;
 
-
-	// Add Code
-	// initialize the geomegtry and transformation of the floor object
-	// world position and scale
-	//floor.setInitModel();
 	/*
-	floor.initGeom();
-	floor.setModelScale(20, 5, 20);//model to model
-	//i'm not sure if this should be (5,5,5)because the figure 2 looks like it is a cube , not rectangular
-	floor.setModelPosition(0, 0, 0);//model to model
-	*/
+	rc = sphereShader.createShaderProgram("sphereBox.vs", "sphereBox.fs");
+	if (rc != 0) {
+		printf(" error after generating the spere shader \n");
+		rc = 1;
+	}*/
 
 
 	// create the house by invoking the house create function
@@ -243,21 +238,16 @@ int Solution::initSolution()
 	house.create();
 	house.setModelPosition(10, 10, 0);
 
-	//table.initGeom();
-	//table.setModelScale(50, 10, 10);
-	//table.setModelPosition(300, 300, 0);
-
-	//house.initGeom();
-
 
 
 
 	// set the camera initial position
-	cam.setCamera(Vector3f(15, 15, 70), Vector3f(15, 0, 0), Vector3f(0, 1, 0));
+	cam.setCamera(Vector3f(0, 500, 1), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	cam.setCamera(Vector3f(0, 0, 300), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	cam.setPerspectiveView(100, 1, 0.01f, 1000);
 
-	
-
-
+	//speed factor
+	factor = 1;
 
 	return 0;
 }
@@ -315,10 +305,9 @@ void Solution::render()
 
 
 	// render the objects
-	floor.render(Matrix4f::identity());
+
 	house.render(Matrix4f::identity());
-	//firFloor.render(Matrix4f::identity());
-	table.render(Matrix4f::identity());
+
 
 	glutSwapBuffers();
 }
@@ -344,57 +333,66 @@ void Solution::passiveMouse(int x, int y)
 
 void Solution::keyboard(unsigned char key, int x, int y)
 {
-	int winId;
-
+	static int nc = 0;
+	nc++;
 	switch (key) {
+	case 033:
+	case 'Q':
 	case 'q':
-		winId = glutGetWindow();
-		glutDestroyWindow(winId);
-		exit(0);
-		break;	
-	case 'i':
-		house.incrementModelPosition(Vector3f(-1, 0, 0)); // translate to left
-		printf("i pressed\n");
-
+		this->~Solution();
+		exit(1);
 		break;
-	case 'l':
-		house.incrementModelPosition(Vector3f(1, 0, 0)); // translate to right
-		printf("L pressed\n");
-
+	case 'x':	// point light
 		break;
-	case 'j':
-		house.incrementModelPosition(Vector3f(0, 0, -1)); // translate to down
-		printf("J pressed\n");
-
+	case 'c':	// spot light
 		break;
-	case 'k':
-		house.incrementModelPosition(Vector3f(0, 0, 1)); // translate to rup
-		printf("K pressed\n");
-
+	case 'v':	// directional light
 		break;
-	case 'a':
-		house.incrementWorldRotations(1, 0, 0); //CCW x-axis
-
-		break;
-	case 'd':
-		house.incrementWorldRotations(-1, 0, 0); // CW x-axis
-
+	case 'b':	// no light
 		break;
 	case 'w':
-		house.incrementWorldRotations(0, 1, 0); // CCW y-axis
-
+		cam.moveForward(NORMAL_SPEED * factor);
 		break;
 	case 's':
-		house.incrementWorldRotations(0, -1, 0); // CW y-axis
-
+		cam.moveBackward(NORMAL_SPEED * factor);
 		break;
-
-	default:
-
+	case 'a':
+		cam.yaw((float).2 * factor);
+		break;
+	case 'd':
+		cam.yaw((float)-.2 * factor);
+		break;
+	case 'g':
+		cam.moveRight(NORMAL_SPEED * factor);
+		break;
+	case 'G':
+		cam.moveLeft(NORMAL_SPEED * factor);
+		break;
+	case 'z':
+		cam.zoomIn();
+		break;
+	case 'Z':
+		cam.zoomOut();
+		break;
+	case 't':
+		//plotWireFrame = plotWireFrame ? 0 : 1;
+		break;
+	case '1':
+		//cam.updateOrientation();
+		break;
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+		factor = (float)(key - '0');
 		break;
 	}
 
-	glutPostRedisplay();
+
 }
 
 
@@ -406,6 +404,25 @@ void Solution::keyboard(unsigned char key, int x, int y)
 
 void Solution::specialKeyboard(int key, int x, int y)
 {
+	switch (key) {
+	case 033:
+	case 'Q':
+	case 'q':
+		exit(1);
+		break;
+	case GLUT_KEY_LEFT:
+		cam.roll((float).2 * factor);
+		break;
+	case GLUT_KEY_UP:
+		cam.pitch((float).2 * factor);
+		break;
+	case GLUT_KEY_RIGHT:
+		cam.roll((float)-.2 * factor);
+		break;
+	case GLUT_KEY_DOWN:
+		cam.pitch((float)-.2 * factor);
+		break;
+	}
 }
 
 

@@ -48,12 +48,20 @@
 #include "Cube.h"
 #include "TwoStory.h"
 #include "camera.h"
-#include "Table.h"
+
 
 
 
 #define UPDATE_RENDERRED_OBJECTS 1000
 #define FRAME_TIME 30
+
+#define NORMAL_SPEED 0.5f
+#define MAX_SPEED 2.0f
+
+#define NO_LIGHT 0
+#define POINT_LIGHT 1
+#define SPOT_LIGHT  2
+#define DIRECTIONAL_LIGHT 3
 
 class Solution
 {
@@ -86,7 +94,6 @@ private:
 	static Solution* sol;
 	Cube floor;
 	TwoStory house;
-	Table table;
 	int perspective;
 
 	int winWidth, winHeight;
