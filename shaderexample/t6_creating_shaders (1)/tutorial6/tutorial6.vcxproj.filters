@@ -13,5 +13,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tutorial6.cpp" />
+    <ClCompile Include="shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

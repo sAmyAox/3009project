@@ -11,7 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="shader.cpp" />
     <ClCompile Include="tutorial6.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A57F5702-DDDC-4562-AE30-6F5B01DBC127}</ProjectGuid>

@@ -8,6 +8,10 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "GL/nuss_math.h"
+#include "shader.h"
+//********这个宏不能省略****************
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 
 
@@ -31,6 +35,7 @@ GLuint vbo;
 GLuint vao;
 GLuint ebo;
 GLuint shaderProgId;
+Shader triShader;
 
 
 
@@ -41,7 +46,8 @@ void renderCB()
     glClear(GL_COLOR_BUFFER_BIT);
 
 	// use the shader
-	glUseProgram(shaderProgId);
+	//glUseProgram(shaderProgId);
+	glUseProgram(triShader.getProgId());
 
 	glBindVertexArray(vao);
 	// draw the triangle
@@ -104,14 +110,7 @@ int initGeom()
 
 
 
-/*
-This funcdtion initializes the OpenGL usage:
-a. It creates teh window
-b. It sets the callback functions
-c. It initializes the glew library
 
-
-*/
 int prepareBuffer() {
 	float vertices[] = {
 	-0.5f,-0.5f,0.0f,	1.0f,0.0f,0.0f,
@@ -136,6 +135,7 @@ int prepareBuffer() {
 
 	return 0;
 }
+
 
 void prepareVAOForGLTriangles() {
 	float positions[] = {
@@ -176,7 +176,12 @@ void render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// use the shader
-	glUseProgram(shaderProgId);
+	//glUseProgram(shaderProgId);
+	glUseProgram(triShader.getProgId());
+
+	triShader.setInt("sampler",0);//前往0号纹理单元读取数据
+	//triShader.setInt("sampler", 1);//前往1号纹理单元读取数据，由于1号纹理单元没有挂载对象，渲染为黑色
+
 
 	glBindVertexArray(vao);
 	// draw the triangle
@@ -194,6 +199,7 @@ void render() {
 	glutSwapBuffers();
 
 }
+
 
 int initOpenGL()
 {
@@ -215,30 +221,7 @@ int initOpenGL()
 	return(rc);
 }
 
-/*
-This function reads a shader code from a file.
-It:
-a. determines the length of the code
-b. allocate memory for the code
-c. reads the code from the file and stores it in the allocated memory
 
-input:
-filename - the name of the code file
-ouput:
-
-shaderCode - assigned the allocated memory for the code (including the code.
-	Note, that the code is a 1D array that includes null terminated substrings.
-
-codeLength - the length of the code that was read.  
-	Note that if codeLength == NULL no value is assigned
-
-	Returns:
-0 - if successful
--1 - if it could not open the file
--2 - if the file does not contain any data (0 length)
-
-
-*/
 int readCode(char * fileName, char **shaderCode, int *codeLength)
 {
    int length = 0;
@@ -412,31 +395,50 @@ err:
 	return(rc);
 }
 
+
 void prepareVao() {
 	float positions[] = {
-	0.5f, 0.5f, 0.0f,   // 右上角
-	0.5f, -0.5f, 0.0f,  // 右下角
-	-0.5f, -0.5f, 0.0f, // 左下角
-	-0.5f, 0.5f, 0.0f
+		-0.5f, -0.5f, 0.0f, // 左下角
+		0.5f, -0.5f, 0.0f,  // 右下角
+		-0.5f, 0.5f, 0.0f,  // 右下角
+		0.5f, 0.5f, 0.0f,   // 右上角
 	};
 
-	for (int i = 0; i < 6; ++i) {
-		positions[i] / 2;
-	}
+	float colors[] = {
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f
+	};
 
+	float uvs[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f
+	};
 
 
 	unsigned int indices[] = {
-		0, 1, 3, // 第一个三角形
-		1, 2, 3  // 第二个三角形
+		0, 1, 2, // 第一个三角形
+		2, 1, 3  // 第二个三角形
 	};
+
+	GLuint colorVbo, posVbo, uvVbo;
 	//2 创建vbo
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(1, &posVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
+	glGenBuffers(1, &colorVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 
-	//3	建 ebo
+	glGenBuffers(1, &uvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
+
+	//3	创建 ebo
 	glGenBuffers(1, &ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -445,9 +447,19 @@ void prepareVao() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	// 5绑定vbo，ebo 加入描述信息
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
 
 	//5.2 加入ebo 到vao中
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -456,7 +468,60 @@ void prepareVao() {
 	glBindVertexArray(0);
 }
 
-/*************************************************************************************/
+//创建纹理对象
+void prepareTexture() {
+	//1. stbimage 读取图片
+	int width, height, channels;
+	GLuint texture;
+
+	//反转y轴
+	stbi_set_flip_vertically_on_load(true);
+
+	unsigned char* data = stbi_load("desk.png", &width, &height, &channels, STBI_rgb_alpha);
+
+	//2. 生成纹理，激活单元 绑定
+
+	glGenTextures(1, &texture);
+
+	//激活
+
+	glActiveTexture(GL_TEXTURE0);
+
+	//绑定
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	//3. 传输纹理数据, 开辟显存
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+	//4. ***释放数据***
+	stbi_image_free(data);
+
+
+	//5. 设置纹理的过滤方式
+	//放大图片
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//缩小图片
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	//6. 设置纹理的包裹方式
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//s是横向方向，u
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//t是纵向方向，t
+
+
+	//7. 绑定采样器到纹理单元
+
+
+	printf("prepare texture complete\n");
+
+}
+
+
+
+
 int main(int argc, char** argv)
 {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -466,19 +531,33 @@ int main(int argc, char** argv)
 	initOpenGL();
     //initGeom();
 	prepareVao();
-
-	//rc = prepareBuffer();
+	prepareTexture();
 	
-
-	rc = createShaders("tri.vs","tri.fs", &shaderProgId);
+	//Shader triShader;
+	
+	//triShader.printShaderStatus();
+	
+	rc = triShader.createShaderProgram("tri.vs","tri.fs");
+	//rc = prepareBuffer();
 	if (rc != 0) {
 		printf("Error in create Shader \n");
 		printf("Hit <cr> to terminate program \n");
 		getchar();
 		return(1);
 	}
+		
+	//glBindVertexArray(vao);
+	
+	//rc = createShaders("tri.vs","tri.fs", &shaderProgId);
+	//if (rc != 0) {
+	//	printf("Error in create Shader \n");
+	//	printf("Hit <cr> to terminate program \n");
+	//	getchar();
+	//	return(1);
+	//}
+	glBindVertexArray(vao);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glutDisplayFunc(render);
     glutMainLoop();
 
