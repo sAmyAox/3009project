@@ -1,6 +1,3 @@
 ﻿  main.cpp
-E:\Download\t6_creating_shaders (1)\tutorial6\main.cpp(175,10): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-E:\Download\t6_creating_shaders (1)\tutorial6\main.cpp(486,68): error C2679: binary '=': no operator found which takes a right-hand operand of type 'glm::tmat4x4<float,glm::highp>' (or there is no acceptable conversion)
-D:\3009\tutorials\shared_gl\include\GL\nuss_matrix.h(561,1): message : could be 'Matrix4f &Matrix4f::operator =(Matrix4f &&)'
-D:\3009\tutorials\shared_gl\include\GL\nuss_matrix.h(561,1): message : or       'Matrix4f &Matrix4f::operator =(const Matrix4f &)'
-E:\Download\t6_creating_shaders (1)\tutorial6\main.cpp(486,68): message : while trying to match the argument list '(Matrix4f, glm::tmat4x4<float,glm::highp>)'
+E:\Download\t6_creating_shaders (1)\tutorial6\main.cpp(200,10): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  tutorial6.vcxproj -> E:\Download\t6_creating_shaders (1)\Debug\tutorial6.exe

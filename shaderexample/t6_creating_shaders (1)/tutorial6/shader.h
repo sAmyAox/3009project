@@ -41,6 +41,9 @@
 #include "GL/nuss_matrix.h"
 #include "GL/glut.h"
 #include "gl/gl.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 
 class Shader
@@ -63,7 +66,7 @@ public:
 
 	void setInt(const std::string& name, int value);
 	void setVector3(const std::string& name, float* values);
-	void setMatrix4(const std::string& name, Matrix4f matrix);
+	void setMatrix4(const std::string& name, glm::mat4 matrix);
 
 
 private:

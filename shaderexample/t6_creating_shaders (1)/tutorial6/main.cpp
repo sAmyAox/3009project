@@ -2,15 +2,15 @@
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "GL/nuss_math.h"
-#include "GL/nuss_matrix.h"
+//#include "GL/nuss_math.h"
+//#include "GL/nuss_matrix.h"
 #include "shader.h"
-
 #include "texture.h"
 #include "graphicsObject.h"
+#include <time.h>
+//#include "table.h"
 //使用glm库，重新编写
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+
 
 
 //globals
@@ -34,29 +34,51 @@ GLuint shaderProgId;
 Shader triShader;
 Texture* texture = nullptr;
 
-//Matrix4f transform = Matrix4f::identity();
-Matrix4f modelMat = Matrix4f::identity(); // = Matrix4f::rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
-Matrix4f scaleMat = Matrix4f::identity();//scale(0.5f,0.5f,0.5f);//scale(scale.x, scale.y, scale.z);
-Matrix4f rotMat = Matrix4f::identity();//rotateX(45.0f,1);//rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+float angle = 0.0f;
+glm::mat4 transform(1.0f);
 
-//观察矩阵（摄像机位置）
-Matrix4f viewMat = Matrix4f::translation(0.0f, 0.0f, -3.0f);
+glm::mat4 viewMat(1.0f);
+glm::mat4 projMat(1.0f);
 
-//投影矩阵
-Matrix4f projMat = Matrix4f::identity();//symmetricPerspectiveProjectionMatrix(45.0f, 0.75f, 0.1f, 100.0f);
-
-
-
-Matrix4f final = projMat * viewMat * rotMat * modelMat;
-
-//Matrix4f modelViewProjMat = Matrix4f::translation(0.0f,0.0f,-3.0f); //cam.getProjectionMatrix(NULL) * modelViewMat;
+////Matrix4f transform = Matrix4f::identity();
+//Matrix4f modelMat = Matrix4f::identity(); // = Matrix4f::rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+//Matrix4f scaleMat = Matrix4f::identity();//scale(0.5f,0.5f,0.5f);//scale(scale.x, scale.y, scale.z);
+//Matrix4f rotMat = Matrix4f::identity();//rotateX(45.0f,1);//rotateRollPitchYaw(rollAngle, pitchAngle, yawAngle, 1);
+//
+//
+//glm::
+//
+//
+//
+////观察矩阵（摄像机位置）
+//Matrix4f viewMat = Matrix4f::translation(0.0f, 0.0f, -3.0f);
+//
+////投影矩阵
+//Matrix4f projMat = Matrix4f::identity();//symmetricPerspectiveProjectionMatrix(45.0f, 0.75f, 0.1f, 100.0f);
+//
+//
+//
+//Matrix4f final = projMat * viewMat * rotMat * modelMat;
+//
+////Matrix4f modelViewProjMat = Matrix4f::translation(0.0f,0.0f,-3.0f); //cam.getProjectionMatrix(NULL) * modelViewMat;
 
 
 
 
 void doTransform() {
-	modelMat = rotMat* scaleMat * modelMat;
+	time_t currenttime = time(NULL);
+
+
+	//modelMat = rotMat* scaleMat * modelMat;
 	
+	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 0.0, 1.0));//绕z轴旋转
+	//transform = glm::rotate(transform, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
+	transform = glm::rotate(transform, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
+	//transform = glm::scale(transform, glm::vec3(1.0f,0.5f,1.0f));
+
+
+	//transform = glm::rotate(transform, (float)currenttime * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+	//transform = glm::rotate(transform,);
 }
 
 
@@ -122,15 +144,15 @@ void prepareVAOForGLTriangles() {
 
 
 void render() {
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	// use the shader
 	glUseProgram(triShader.getProgId());
 
 	triShader.setInt("sampler",0);//前往0号纹理单元读取数据
 	//triShader.setInt("sampler", 1);//前往1号纹理单元读取数据，由于1号纹理单元没有挂载对象，渲染为黑色
-	triShader.setMatrix4("model", modelMat);
+	triShader.setMatrix4("transform", transform);
 	triShader.setMatrix4("view", viewMat);
 	triShader.setMatrix4("projection", projMat);
 	//triShader.setMatrix4("transform",model);
@@ -139,9 +161,11 @@ void render() {
 
 	glBindVertexArray(vao);
 
-	glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+	glDrawElements(GL_TRIANGLES,36,GL_UNSIGNED_INT,0);
+	//glDrawArrays(GL_TRIANGLES, 0,36);
 
 	glutSwapBuffers();
+	printf("swapbuffer called\n");
 
 }
 
@@ -149,7 +173,7 @@ void render() {
 int initOpenGL()
 {
 	int rc = 0;
-    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(50, 50);
     glutCreateWindow("Draw Triangle");
@@ -342,45 +366,109 @@ err:
 
 
 void prepareVao() {
-	//float positions[] = {
-	//	-0.5f, -0.5f, 0.0f, // 左下角
-	//	0.5f, -0.5f, 0.0f,  // 右下角
-	//	0.0f, 0.5f, 0.0f,  // 右下角
-	//	//0.0f, 0.5f, 0.0f,   // 中间角
-	//};
-
-	float positions[] = {
-	-1.0f, 0.0f, 0.0f, // 左下角
-	1.0f, 0.0f, 0.0f,  // 右下角
-	0.0f, 1.0f, 0.0f,  // 右下角
-	0.0f, -1.0f, 0.0f,   // 中间角
+	//坐标
+	float vertices[] = {
+	-1.0f,	-1.0f,	 1.0f,
+	 1.0f,	-1.0f,	 1.0f,
+	 1.0f,	 1.0f,	 1.0f,
+	-1.0f,	 1.0f,	 1.0f,
+	-1.0f,	-1.0f,	-1.0f,
+	 1.0f,	-1.0f,	-1.0f,
+	 1.0f,	 1.0f,	-1.0f,
+	-1.0f,	 1.0f,	-1.0f
 	};
+	unsigned int indices[] = {
+		// front face
+		0, 1, 2,
+		2, 3, 0,
+		// top face
+		3, 2, 6,
+		6, 7, 3,
+		// back face
+		7, 6, 5,
+		5, 4, 7,
+		// bottom face
+		4, 5, 1,
+		1, 0, 4,
+		// left face
+		4, 0, 3,
+		3, 7, 4,
+		// right face
+		1, 5, 6,
+		6, 2, 1
+	};
+
+
+
+	//float positions[] = {
+	//-1.0f, 0.0f, 0.0f, // 左下角
+	//1.0f, 0.0f, 0.0f,  // 右下角
+	//0.0f, 1.0f, 0.0f,  // 右下角
+	//0.0f, -1.0f, 0.0f,   // 中间角
+	//};
 
 	float colors[] = {
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
 		//0.5f, 0.5f, 0.5f, 1.0f
 	};
 
 	float uvs[] = {
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		0.5f, 1.0f,
-		0.5f, -1.0f
+		// Front face
+	0.0f, 0.0f, // 顶点0的纹理坐标
+	1.0f, 0.0f, // 顶点1的纹理坐标
+	1.0f, 1.0f, // 顶点2的纹理坐标
+	0.0f, 1.0f, // 顶点3的纹理坐标
+
+	// Top face
+	0.0f, 1.0f, // 顶点3的纹理坐标
+	1.0f, 1.0f, // 顶点2的纹理坐标
+	1.0f, 0.0f, // 顶点6的纹理坐标
+	0.0f, 0.0f, // 顶点7的纹理坐标
+
+	// Back face
+	0.0f, 0.0f, // 顶点7的纹理坐标
+	1.0f, 0.0f, // 顶点6的纹理坐标
+	1.0f, 1.0f, // 顶点5的纹理坐标
+	0.0f, 1.0f, // 顶点4的纹理坐标
+
+	// Bottom face
+	0.0f, 0.0f, // 顶点4的纹理坐标
+	1.0f, 0.0f, // 顶点5的纹理坐标
+	1.0f, 1.0f, // 顶点1的纹理坐标
+	0.0f, 1.0f, // 顶点0的纹理坐标
+
+	// Left face
+	0.0f, 0.0f, // 顶点4的纹理坐标
+	1.0f, 0.0f, // 顶点0的纹理坐标
+	1.0f, 1.0f, // 顶点3的纹理坐标
+	0.0f, 1.0f, // 顶点7的纹理坐标
+
+	// Right face
+	0.0f, 0.0f, // 顶点1的纹理坐标
+	1.0f, 0.0f, // 顶点5的纹理坐标
+	1.0f, 1.0f, // 顶点6的纹理坐标
+	0.0f, 1.0f  // 顶点2的纹理坐标
 	};
 
 
-	unsigned int indices[] = {
-		0, 1, 2, // 第一个三角形
-		0, 1, 3  // 第二个三角形
-	};
+	//unsigned int indices[] = {
+	//	0, 1, 2, // 第一个三角形
+	//	2, 1, 3  // 第二个三角形
+	//};
 
 	GLuint colorVbo, posVbo, uvVbo;
 	//2 创建vbo
 	glGenBuffers(1, &posVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &colorVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
@@ -468,6 +556,7 @@ void prepareTexture() {
 	////7. 绑定采样器到纹理单元
 
 	texture = new Texture("goku.jpg", 0);
+	//texture = new Texture("desk.png", 0);
 
 	printf("prepare texture complete\n");
 
@@ -477,14 +566,13 @@ void prepareTexture() {
 //相机相关：
 void prepareCamera() {
 
-	viewMat = Matrix4f::cameraMatrix(Vector3f(0.0f,0.0f,10.0f),Vector3f(0.0f,0.0f,0.0f),Vector3f(0.0f,1.0f,0.0f));
+	//viewMat = Matrix4f::cameraMatrix(Vector3f(0.0f,0.0f,10.0f),Vector3f(0.0f,0.0f,0.0f),Vector3f(0.0f,1.0f,0.0f));
+	viewMat = glm::lookAt(glm::vec3(1.0f,1.0f,5.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
 	
 }
 
 void prepareProjection() {
-	projMat = Matrix4f::symmetricPerspectiveProjectionMatrix(60.0f,1.0f,0.1f,1000.0f);
-	projMat = Matrix4f::identity();
-	projMat = glm::perspective(glm::radians(60.0f),0.75f,0.1f,1000.0f);
+	projMat = glm::perspective(45.0f,0.75f,0.1f,1000.0f);
 }
 
 int getWinHeight(){
@@ -494,6 +582,108 @@ int getWinWidth() {
 	return 800;
 }
 
+
+void prepare3DTriangleVao() {
+	float vertices[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+	//unsigned int VBO, VAO;
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+
+	glBindVertexArray(vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	// texture coord attribute
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
+
+
+	//glBindVertexArray(0);
+}
+
+void update(int value) {
+	angle = 0.01f; // 增加旋转角度
+	doTransform();
+	glutPostRedisplay(); // 标记窗口需要重新绘制
+	glutTimerFunc(16, update, 0); // 每16毫秒调用一次update函数
+}
+
+
+void specialKeyboard(int key, int x, int y)
+{
+	switch (key) {
+	case 033:
+	case 'Q':
+	case 'q':
+		exit(1);
+		break;
+	case GLUT_KEY_LEFT:
+		break;
+	case GLUT_KEY_UP:
+		
+		break;
+	case GLUT_KEY_RIGHT:
+		
+		break;
+	case GLUT_KEY_DOWN:
+		
+		break;
+	}
+}
+
+
+
+
+
+
+
 int main(int argc, char** argv)
 {
 	int rc = 0;
@@ -502,13 +692,13 @@ int main(int argc, char** argv)
 
 	
 	initOpenGL();
-	doTransform();
     //initGeom();
 	prepareVao();
+	//prepare3DTriangleVao();
 	prepareTexture();
 	prepareCamera();
 	prepareProjection();
-
+	//transform = glm::scale(glm::mat4(1.0f), glm::vec3(1.2f, 0.3f, 0.6f));
 	
 	rc = triShader.createShaderProgram("tri.vs","tri.fs");
 	if (rc != 0) {
@@ -517,16 +707,18 @@ int main(int argc, char** argv)
 		getchar();
 		return(1);
 	}
+	doTransform();
 
 	glBindVertexArray(vao);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnable(GL_DEPTH_TEST);
 	glutDisplayFunc(render);
+	glutTimerFunc(25, update, 0);
+	//glutMouseFunc(mouseCB);
     glutMainLoop();
 
     return 0;
 }
-
-
 
 

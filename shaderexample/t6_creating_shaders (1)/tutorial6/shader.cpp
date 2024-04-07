@@ -698,9 +698,9 @@ void Shader::setVector3(const std::string& name, float* values) {
 	glUniform3fv(location, 1, values);
 }
 
-void Shader::setMatrix4(const std::string& name, Matrix4f matrix) {
+void Shader::setMatrix4(const std::string& name, glm::mat4 matrix) {
 
 	GLuint location = glGetUniformLocation(shaderProgramid, name.c_str());
 
-	glUniformMatrix4fv(location,1,GL_FALSE,matrix.data());
+	glUniformMatrix4fv(location,1,GL_FALSE,glm::value_ptr(matrix));
 }

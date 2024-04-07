@@ -7,16 +7,16 @@ out vec4 color;
 out vec2 uv;
 
 // mat4 transform;
-uniform mat4 model;
+uniform mat4 transform;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
     vec4 position = vec4(aPos, 1.0);
-    position =  projection * view  * model * position;
+    position =  projection * view  * transform * position;
 
-    //gl_Position = projection * view * model * vec4(aPos,1.0);
+    //gl_Position = projection * view * transform * vec4(aPos,1.0);
     gl_Position = position;
     color = aColor;
     uv = aUv;
