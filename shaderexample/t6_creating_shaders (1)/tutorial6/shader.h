@@ -63,6 +63,8 @@ public:
 
 	void setInt(const std::string& name, int value);
 	void setVector3(const std::string& name, float* values);
+	void setMatrix4(const std::string& name, Matrix4f matrix);
+
 
 private:
 	GLuint vertShaderid;

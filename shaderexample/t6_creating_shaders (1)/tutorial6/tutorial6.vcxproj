@@ -11,11 +11,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="graphicsObject.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="tutorial6.cpp" />
+    <ClCompile Include="table.cpp" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="graphicsObject.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="table.h" />
+    <ClInclude Include="texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tri.fs" />
+    <None Include="tri.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A57F5702-DDDC-4562-AE30-6F5B01DBC127}</ProjectGuid>

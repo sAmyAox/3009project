@@ -405,6 +405,9 @@ int Shader::copyMatrixToShader(Matrix4f matrix, const char* name) {
 }
 
 
+
+
+
 /*********************************************************************/
 /*
 Copy an array of floats to the shader
@@ -693,4 +696,11 @@ void Shader::setVector3(const std::string& name, float* values) {
 	GLuint location = glGetUniformLocation(shaderProgramid,name.c_str());
 
 	glUniform3fv(location, 1, values);
+}
+
+void Shader::setMatrix4(const std::string& name, Matrix4f matrix) {
+
+	GLuint location = glGetUniformLocation(shaderProgramid, name.c_str());
+
+	glUniformMatrix4fv(location,1,GL_FALSE,matrix.data());
 }
