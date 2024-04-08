@@ -26,9 +26,11 @@ Texture::Texture(const std::string& path, unsigned int unit) {
     //***释放数据
     stbi_image_free(data);
 
+    
+
     //4 设置纹理的过滤方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     //5 设置纹理的包裹方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//u
