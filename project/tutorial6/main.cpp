@@ -2,6 +2,13 @@
 #include "includPath.h"
 #include "texture.h"
 #include "shader.h"
+#include "camera.h"
+
+typedef struct point2D {
+	GLfloat x, y;
+} Point2D;
+
+
 //globals
 
 static const GLfloat g_vertex_buffer_data[] = {
@@ -89,19 +96,29 @@ static const unsigned int g_indices_data[]{
 
 static const glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(0.0f,  7.5f, 0.0f)
+	glm::vec3(0.0f,  12.5f, 0.0f)
+	//现在蜡烛的顶点为（0，25，0）
 };
 
 static const glm::vec3 cubeScaling[] = {
 	glm::vec3(25.0f,5.0f,20.0f),
-	glm::vec3(1.0f,2.5f,1.0f)
+	glm::vec3(3.0f,10.0f,3.0f)
 };
 
-GLuint vbo, vao, ebo, colorVbo, posVbo, uvVbo, shaderProgId;
+GLuint deskVbo, deskVao, deskEbo, deskColorVbo, deskPosVbo, deskUvVbo;
+GLuint candleVbo, candleVao, candleEbo, candleColorVbo, candlePosVbo, candleUvVbo;
 Shader triShader;
-Texture* texture = nullptr;
+Shader candleShader;
+Texture* textureDesk = nullptr;
+Texture* textureCandle = nullptr;
+Camera cam;
+
+Point2D curMousePoint; // cur mouse point
+Point2D lastMousePoint; // last mouse point
+
 float angle = 0.0f;
 glm::mat4 transformDesk(1.0f);
+glm::mat4 transformCandle(1.0f);
 glm::mat4 viewMat(1.0f);
 glm::mat4 projMat(1.0f);
 
@@ -109,8 +126,8 @@ glm::mat4 projMat(1.0f);
 void doTransform() {
 	time_t currenttime = time(NULL);	
 	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 0.0, 1.0));//绕z轴旋转
-	//transform = glm::rotate(transform, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
-	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
+	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
+	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
 
 }
 
@@ -125,50 +142,48 @@ void render() {
 	triShader.setInt("sampler",0);//前往0号纹理单元读取数据
 	//triShader.setInt("sampler", 1);//前往1号纹理单元读取数据，由于1号纹理单元没有挂载对象，渲染为黑色
 	
-	triShader.setMatrix4("view", viewMat);
-	triShader.setMatrix4("projection", projMat);
-
+	triShader.setMatrix4("view", cam.getViewMatrix());
+	triShader.setMatrix4("projection", cam.getProjMatrix());
 	triShader.setMatrix4("transform", transformDesk);
 
-	glBindVertexArray(vao);
+	glBindVertexArray(deskVao);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	//解绑
+	glBindVertexArray(0);
 
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		// calculate the model matrix for each object and pass it to shader before drawing
-		//
-		transformDesk = glm::mat4(1.0f);
-		transformDesk = glm::translate(transformDesk, cubePositions[i]);
-		transformDesk = glm::scale(transformDesk, cubeScaling[i]);
 
-		triShader.setMatrix4("transform", transformDesk);
+	candleShader.setInt("sampler", 1);//前往0号纹理单元读取数据
 
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	}
+	candleShader.setMatrix4("view", cam.getViewMatrix());
+	candleShader.setMatrix4("projection", cam.getProjMatrix());
+	candleShader.setMatrix4("transform", transformCandle);
+
+
+	glBindVertexArray(candleVao);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	//for (unsigned int i = 0; i < 2; i++)
+	//{
+	//	// calculate the model matrix for each object and pass it to shader before drawing
+	//	//
+	//	transformDesk = glm::mat4(1.0f);
+	//	transformDesk = glm::translate(transformDesk, cubePositions[i]);
+	//	transformDesk = glm::scale(transformDesk, cubeScaling[i]);
+
+	//	triShader.setMatrix4("transform", transformDesk);
+
+	//	
+	//}
+	
 
 	glutSwapBuffers();
 
 }
 
 
-int initOpenGL()
-{
-	int rc = 0;
-    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
-    glutInitWindowSize(800, 600);
-    glutInitWindowPosition(50, 50);
-    glutCreateWindow("Draw Triangle");
 
-	glutDisplayFunc(render);
- 
-    // Must be done after glut is initialized!
-    GLenum res = glewInit();
-    if (res != GLEW_OK) {
-      printf("Error - %s \n", glewGetErrorString(res));
-      return (-1);
-    }
 
-	return(rc);
-}
+
 
 int readCode(char * fileName, char **shaderCode, int *codeLength)
 {
@@ -209,7 +224,7 @@ err:
 }
 
 
-void prepareVao() {
+void prepareDeskVao() {
 
 
 	
@@ -226,68 +241,135 @@ void prepareVao() {
 
 
 	//2 创建vbo
-	glGenBuffers(1, &posVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
+	glGenBuffers(1, &deskPosVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskPosVbo);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 	
-	glGenBuffers(1, &colorVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+	glGenBuffers(1, &deskColorVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskColorVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 
 
-	glGenBuffers(1, &uvVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glGenBuffers(1, &deskUvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskUvVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
 
 	//3	创建 ebo
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glGenBuffers(1, &deskEbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, deskEbo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_indices_data), g_indices_data, GL_STATIC_DRAW);
 
 	//4 创建vao
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glGenVertexArrays(1, &deskVao);
+	glBindVertexArray(deskVao);
 	// 5绑定vbo，ebo 加入描述信息
-	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskPosVbo);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskColorVbo);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
 	
-	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskUvVbo);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	
 
 
 	//5.2 加入ebo 到vao中
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, deskEbo);
 
 	glBindVertexArray(0);
 }
 
+void prepareCandleVao() {
+	float colors[] = {
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+	};
+
+
+	//2 创建vbo
+	glGenBuffers(1, &candlePosVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, candlePosVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &candleColorVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, candleColorVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+
+
+	glGenBuffers(1, &candleUvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, candleUvVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+
+	//3	创建 ebo
+	glGenBuffers(1, &candleEbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, candleEbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_indices_data), g_indices_data, GL_STATIC_DRAW);
+
+	//4 创建vao
+	glGenVertexArrays(1, &candleVao);
+	glBindVertexArray(candleVao);
+
+	// 5绑定vbo，ebo 加入描述信息
+	glBindBuffer(GL_ARRAY_BUFFER, candlePosVbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, candleColorVbo);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, candleUvVbo);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+
+	//5.2 加入ebo 到vao中
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, candleEbo);
+	
+	//解绑
+	glBindVertexArray(0);
+}
+
 //创建纹理对象
-void prepareTexture() {
+void prepareDeskTexture() {
 
 	
 
-	//texture = new Texture("goku.jpg", 0);
-	texture = new Texture("desk.png", 0);
+	//textureDesk = new Texture("goku.jpg", 0);
+	textureDesk = new Texture("desk.png", 0);
 
 	printf("prepare texture complete\n");
 
 }
 
+void prepareCandleTexture() {
+
+	textureCandle = new Texture("candle.png", 1);
+}
+
+
 
 //相机相关：
 void prepareCamera() {
 
-	//viewMat = Matrix4f::cameraMatrix(Vector3f(0.0f,0.0f,10.0f),Vector3f(0.0f,0.0f,0.0f),Vector3f(0.0f,1.0f,0.0f));
-	viewMat = glm::lookAt(glm::vec3(0.0f,00.0f,100.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+	//viewMat = glm::lookAt(glm::vec3(100.0f,100.0f,100.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+
+	cam.setCamera(glm::vec3(00.0f, 00.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//cam.viewMat = glm::lookAt(glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	
 }
 
@@ -295,78 +377,6 @@ void prepareProjection() {
 	projMat = glm::perspective(70.0f,0.75f,0.1f,1000.0f);
 }
 
-int getWinHeight(){
-	return 600;
-}
-int getWinWidth() {
-	return 800;
-}
-
-
-void prepare3DTriangleVao() {
-	float vertices[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-	//unsigned int VBO, VAO;
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// position attribute
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
-
-
-	//glBindVertexArray(0);
-}
 
 void update(int value) {
 	angle = 0.01f; // 增加旋转角度
@@ -399,8 +409,117 @@ void specialKeyboard(int key, int x, int y)
 }
 
 
+void setObjects() {
+
+	transformDesk = glm::translate(transformDesk, cubePositions[0]);
+	transformCandle = glm::translate(transformCandle, cubePositions[1]);
 
 
+
+	transformDesk = glm::scale(transformDesk, cubeScaling[0]);
+	transformCandle = glm::scale(transformCandle, cubeScaling[1]);
+
+}
+
+
+
+void mymouse(int button, int state, int x, int y)
+{
+	static int posX = 0, posY = 0;
+	static int winWidth = 0, winHeight = 0;
+	static int fullScreenState = 0;
+	if (state == GLUT_DOWN && button == GLUT_RIGHT_BUTTON) {
+		printf("state is right mouse button pressed x,y=(%d, %d)\n", x, y);
+
+	}
+	else if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
+		printf("state is left mouse button pressed x,y=(%d, %d)\n", x, y);
+		//左键调整yaw pitch
+	}
+
+}
+
+
+
+/**********************************************************************************************/
+void myMotion(int x, int y)
+{
+	static int posX = 0, posY = 0;
+	//如果x++，pitch++
+	//if  x-- pitch --
+	//if y ++ yaw ++
+	//if y -- yaw --
+	if (lastMousePoint.x < x) {
+		printf("pitch +\n");
+		cam.rotateYaw(-0.10f);
+	
+	}else if(lastMousePoint.x > x) {
+		printf("pitch -\n");
+		cam.rotateYaw(0.10f);
+
+	}
+	else if (lastMousePoint.y < y) {
+		printf("yaw+\n");
+		cam.rotatePitch(-0.10f);
+	}
+	else if (lastMousePoint.y > y) {
+		printf("yaw -\n");
+		cam.rotatePitch(0.10f);
+	}
+	lastMousePoint.x = x;
+	lastMousePoint.y = y;
+	//printf("mouse motion  x,y = %d %d\n", x, y);
+
+}
+
+void mywheel(int wheel, int direction, int x, int y) {
+
+	printf("wheel action: direction:%d\n", direction);
+	//1 = up
+	//-1 = down
+
+	if (direction == 1) {
+		//cam.zoomin();
+		printf("pretned zoom in\n");
+		cam.zoomIn();
+	}
+	else if (direction == -1) {
+		//cam.zoomout();
+		printf("pretned zoom out\n");
+		cam.zoomOut();
+
+	}
+
+}
+
+int initOpenGL()
+{
+	int rc = 0;
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitWindowSize(800, 600);
+	glutInitWindowPosition(50, 50);
+	glutCreateWindow("Sence Generation");
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glutDisplayFunc(render);
+
+	glutMouseFunc(mymouse);
+	glutMotionFunc(myMotion);
+	glutMouseWheelFunc(mywheel);
+
+	glutTimerFunc(25, update, 0);
+
+	glEnable(GL_DEPTH_TEST);
+
+	// Must be done after glut is initialized!
+	GLenum res = glewInit();
+	if (res != GLEW_OK) {
+		printf("Error - %s \n", glewGetErrorString(res));
+		return (-1);
+	}
+
+	return(rc);
+}
 
 
 
@@ -410,15 +529,25 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
 
 
-	
+	//initialize
 	initOpenGL();
-	prepareVao();
 
+	//creating Objects
+	prepareDeskVao();
+	prepareCandleVao();
 
-	prepareTexture();
+	//set object positions
+	setObjects();
+	//prepare shader + textures
+	prepareDeskTexture();
+	prepareCandleTexture();
+
+	//prepare camera attrib
 	prepareCamera();
 	prepareProjection();
-	
+
+
+	//create shader obj
 	rc = triShader.createShaderProgram("tri.vs","tri.fs");
 	if (rc != 0) {
 		printf("Error in create Shader \n");
@@ -426,18 +555,15 @@ int main(int argc, char** argv)
 		getchar();
 		return(1);
 	}
-	doTransform();
+	rc = candleShader.createShaderProgram("tri.vs", "tri.fs");
+	if (rc != 0) {
+		printf("Error in create Shader \n");
+		printf("Hit <cr> to terminate program \n");
+		getchar();
+		return(1);
+	}
+	
 
-	glBindVertexArray(vao);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
-	
-	
-	glEnable(GL_DEPTH_TEST);
-	glutDisplayFunc(render);
-	glutTimerFunc(25, update, 0);
-	//glutMouseFunc(mouseCB);
     glutMainLoop();
 
     return 0;

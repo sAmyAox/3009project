@@ -1,9 +1,3 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (tutorial6.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  shader.cpp
-D:\3009\project\t6_creating_shaders (1)\tutorial6\shader.cpp(31,7): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-D:\3009\project\t6_creating_shaders (1)\tutorial6\shader.cpp(635,9): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  texture.cpp
-  main.cpp
-D:\3009\project\t6_creating_shaders (1)\tutorial6\main.cpp(179,10): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  Generating Code...
-  tutorial6.vcxproj -> D:\3009\project\t6_creating_shaders (1)\Debug\project.exe
+  camera.cpp
+  tutorial6.vcxproj -> D:\3009\project\project\Debug\project.exe
