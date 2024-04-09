@@ -654,12 +654,12 @@ void Shader::setInt(const std::string& name, int value) {
 
 }
 
-void Shader::setVector3(const std::string& name, float* values) {
-	//通过名称拿到uniform变量的位置 location
+void Shader::setVector3(const std::string& name, const glm::vec3 value) 
+{
 
 	GLuint location = glGetUniformLocation(shaderProgramid, name.c_str());
 
-	glUniform3fv(location, 1, values);
+	glUniform3fv(location, 1, &value[0]);
 }
 
 void Shader::setMatrix4(const std::string& name, glm::mat4 matrix) {

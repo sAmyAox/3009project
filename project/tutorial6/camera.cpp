@@ -91,3 +91,7 @@ void Camera::rotateYaw(float angle) {
 	lookAtVector = glm::vec3(lookAtVector.x, lookAtVector.y, lookAtVector.z);
 
 }
+
+glm::vec3 Camera::getViewPos() {
+	return position;
+}

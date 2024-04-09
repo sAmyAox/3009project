@@ -17,6 +17,7 @@ public:
 
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjMatrix();
+	glm::vec3 getViewPos();
 	void setCamera(glm::vec3 position, glm::vec3 lookAt, glm::vec3 up);
 
 public:

@@ -10,83 +10,95 @@ typedef struct point2D {
 
 
 //globals
+glm::vec3 lightPos = glm::vec3(0.0f, 25.5f, 0.0f);
+glm::vec3 lightColor = glm::vec3(0.5f,0.5f,0.5f);
 
 static const GLfloat g_vertex_buffer_data[] = {
-	-1.0f,-1.0f,-1.0f, // triangle 1 : begin
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, // triangle 1 : end
-	1.0f, 1.0f,-1.0f, // triangle 2 : begin
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f, // triangle 2 : end
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
 static const GLfloat g_uv_buffer_data[] = {
-	0.000059f, 1.0f - 0.000004f,
-	0.000103f, 1.0f - 0.336048f,
-	0.335973f, 1.0f - 0.335903f,
-	1.000023f, 1.0f - 0.000013f,
-	0.667979f, 1.0f - 0.335851f,
-	0.999958f, 1.0f - 0.336064f,
-	0.667979f, 1.0f - 0.335851f,
-	0.336024f, 1.0f - 0.671877f,
-	0.667969f, 1.0f - 0.671889f,
-	1.000023f, 1.0f - 0.000013f,
-	0.668104f, 1.0f - 0.000013f,
-	0.667979f, 1.0f - 0.335851f,
-	0.000059f, 1.0f - 0.000004f,
-	0.335973f, 1.0f - 0.335903f,
-	0.336098f, 1.0f - 0.000071f,
-	0.667979f, 1.0f - 0.335851f,
-	0.335973f, 1.0f - 0.335903f,
-	0.336024f, 1.0f - 0.671877f,
-	1.000004f, 1.0f - 0.671847f,
-	0.999958f, 1.0f - 0.336064f,
-	0.667979f, 1.0f - 0.335851f,
-	0.668104f, 1.0f - 0.000013f,
-	0.335973f, 1.0f - 0.335903f,
-	0.667979f, 1.0f - 0.335851f,
-	0.335973f, 1.0f - 0.335903f,
-	0.668104f, 1.0f - 0.000013f,
-	0.336098f, 1.0f - 0.000071f,
-	0.000103f, 1.0f - 0.336048f,
-	0.000004f, 1.0f - 0.671870f,
-	0.336024f, 1.0f - 0.671877f,
-	0.000103f, 1.0f - 0.336048f,
-	0.336024f, 1.0f - 0.671877f,
-	0.335973f, 1.0f - 0.335903f,
-	0.667969f, 1.0f - 0.671889f,
-	1.000004f, 1.0f - 0.671847f,
-	0.667979f, 1.0f - 0.335851f
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f,
+
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
+	1.0f, 1.0f,
+	0.0f, 1.0f,
+	0.0f, 0.0f
 };
 
 static const unsigned int g_indices_data[]{
@@ -97,19 +109,19 @@ static const unsigned int g_indices_data[]{
 static const glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
 	glm::vec3(0.0f,  15.0f, 0.0f),
-	glm::vec3(0.0f,	 26.0f, 0.0f)
+	glm::vec3(0.0f,	 25.5f, 0.0f)
 	//现在蜡烛的顶点为（0，25，0）
 };
 
 static const glm::vec3 cubeScaling[] = {
-	glm::vec3(25.0f,5.0f,20.0f),
-	glm::vec3(3.0f,10.0f,3.0f),
+	glm::vec3(100.0f,10.0f,60.0f),
+	glm::vec3(6.0f,20.0f,6.0f),
 	glm::vec3(1.0f,1.0f,1.0f)
 };
 
-GLuint deskVbo, deskVao, deskEbo, deskColorVbo, deskPosVbo, deskUvVbo;
-GLuint candleVbo, candleVao, candleEbo, candleColorVbo, candlePosVbo, candleUvVbo;
-GLuint lightVbo, lightVao, lightEbo, lightColorVbo, lightPosVbo, lightUvVbo;
+GLuint deskVbo, deskVao, deskEbo, deskNormalVbo, deskPosVbo, deskUvVbo;
+GLuint candleVbo, candleVao, candleEbo, candleNormalVbo, candlePosVbo, candleUvVbo;
+GLuint lightVbo, lightVao, lightEbo, lightNormalVbo, lightPosVbo, lightUvVbo;
 
 Shader triShader;
 Shader candleShader;
@@ -118,7 +130,7 @@ Shader lightShader;
 Texture* textureDesk = nullptr;
 Texture* textureCandle = nullptr;
 Texture* textureLight = nullptr;
-
+bool marker = true;
 Camera cam;
 
 Point2D curMousePoint; // cur mouse point
@@ -139,36 +151,10 @@ glm::mat4 projMat(1.0f);
 
 void prepareLightVao() {
 
-
-	float colors[] = {
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-	};
-
-
-
-
-
 	//2 创建vbo
 	glGenBuffers(1, &lightPosVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, lightPosVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-	/*glGenBuffers(1, &lightColorVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, lightColorVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);*/
-
-	/*
-	glGenBuffers(1, &lightUvVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, lightUvVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
-	*/
 
 	//3	创建 ebo
 	glGenBuffers(1, &lightEbo);
@@ -181,17 +167,7 @@ void prepareLightVao() {
 	// 5绑定vbo，ebo 加入描述信息
 	glBindBuffer(GL_ARRAY_BUFFER, lightPosVbo);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-	/*glBindBuffer(GL_ARRAY_BUFFER, lightColorVbo);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);*/
-
-	/*
-	glBindBuffer(GL_ARRAY_BUFFER, lightUvVbo);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	*/
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 
 
 	//5.2 加入ebo 到vao中
@@ -202,29 +178,15 @@ void prepareLightVao() {
 
 void prepareDeskVao() {
 
-
-	
-	float colors[] = {
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-	};
-
-
 	//2 创建vbo
 	glGenBuffers(1, &deskPosVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, deskPosVbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 	
-	glGenBuffers(1, &deskColorVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, deskColorVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+
+	//glGenBuffers(1, &deskColorVbo);
+	//glBindBuffer(GL_ARRAY_BUFFER, deskColorVbo);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 
 
 	glGenBuffers(1, &deskUvVbo);
@@ -236,23 +198,31 @@ void prepareDeskVao() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, deskEbo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_indices_data), g_indices_data, GL_STATIC_DRAW);
 
+	glGenBuffers(1, &deskNormalVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, deskNormalVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
 	//4 创建vao
 	glGenVertexArrays(1, &deskVao);
 	glBindVertexArray(deskVao);
+
 	// 5绑定vbo，ebo 加入描述信息
 	glBindBuffer(GL_ARRAY_BUFFER, deskPosVbo);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, deskColorVbo);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	//glBindBuffer(GL_ARRAY_BUFFER, deskColorVbo);
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
 	
 	glBindBuffer(GL_ARRAY_BUFFER, deskUvVbo);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	
+	glBindBuffer(GL_ARRAY_BUFFER, deskNormalVbo);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
 
 
 	//5.2 加入ebo 到vao中
@@ -262,33 +232,24 @@ void prepareDeskVao() {
 }
 
 void prepareCandleVao() {
-	float colors[] = {
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-	};
-
-
-
 
 	//2 创建vbo
 	glGenBuffers(1, &candlePosVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, candlePosVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &candleColorVbo);
+	/*glGenBuffers(1, &candleColorVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, candleColorVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);*/
 
 
 	glGenBuffers(1, &candleUvVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, candleUvVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &candleNormalVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, candleNormalVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
 	//3	创建 ebo
 	glGenBuffers(1, &candleEbo);
@@ -302,16 +263,21 @@ void prepareCandleVao() {
 	// 5绑定vbo，ebo 加入描述信息
 	glBindBuffer(GL_ARRAY_BUFFER, candlePosVbo);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, candleColorVbo);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	//glBindBuffer(GL_ARRAY_BUFFER, candleColorVbo);
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, candleUvVbo);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, candleNormalVbo);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
 
 
 	//5.2 加入ebo 到vao中
@@ -482,7 +448,7 @@ err:
 }
 
 void render() {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// use the shader
@@ -492,6 +458,10 @@ void render() {
 	triShader.setMatrix4("view", cam.getViewMatrix());
 	triShader.setMatrix4("projection", cam.getProjMatrix());
 	triShader.setMatrix4("transform", transformDesk);
+	triShader.setVector3("lightPos", lightPos);
+	triShader.setVector3("lightColor", lightColor);
+	triShader.setVector3("viewPos", cam.getViewPos());
+
 
 	glBindVertexArray(deskVao);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -509,6 +479,9 @@ void render() {
 	candleShader.setMatrix4("view", cam.getViewMatrix());
 	candleShader.setMatrix4("projection", cam.getProjMatrix());
 	candleShader.setMatrix4("transform", transformCandle);
+	candleShader.setVector3("lightPos", lightPos);
+	candleShader.setVector3("lightColor", lightColor);
+	candleShader.setVector3("viewPos", cam.getViewPos());
 
 
 	glBindVertexArray(candleVao);
@@ -539,14 +512,40 @@ void doTransform() {
 	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 0.0, 1.0));//绕z轴旋转
 	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
 	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
+	
+	if (marker == true) {
+		lightColor.r -= 0.01f;
+		lightColor.g -= 0.01f;
+		lightColor.b -= 0.01f;
+		if (lightColor.r <= 0.4f){
+			marker = false;
+		}
+		printf("current color float: %f\n", lightColor.r);
+
+	}
+	else if(marker == false){
+		lightColor.r += 0.01f;
+		lightColor.g += 0.01f;
+		lightColor.b += 0.01f;
+		if (lightColor.r >= 0.99f) {
+			marker = true;
+		}
+		printf("current color float: %f\n", lightColor.r);
+	}
+	
+
+
 
 }
 
 void update(int value) {
 	angle = 0.01f; // 增加旋转角度
 	doTransform();
+
+	//candleShader.setVector3("viewPos", cam.getViewPos());
+	//triShader.setVector3("viewPos", cam.getViewPos());
+	glutTimerFunc(25, update, 0);
 	glutPostRedisplay(); // 标记窗口需要重新绘制
-	glutTimerFunc(16, update, 0); // 每16毫秒调用一次update函数
 }
 
 int initOpenGL()
@@ -573,6 +572,13 @@ int initOpenGL()
 	if (res != GLEW_OK) {
 		printf("Error - %s \n", glewGetErrorString(res));
 		return (-1);
+	}
+	const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+	if (glslVersion) {
+		printf("GLSL Version: %s\n", glslVersion);
+	}
+	else {
+		printf("Failed to retrieve GLSL version information");
 	}
 
 	return(rc);

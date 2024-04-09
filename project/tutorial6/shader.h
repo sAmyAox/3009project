@@ -24,7 +24,7 @@ public:
 	//int copyIntVectorToShader(int* v, int vectorSize, int elementSize, const char* name);
 
 	void setInt(const std::string& name, int value);
-	void setVector3(const std::string& name, float* values);
+	void setVector3(const std::string& name, glm::vec3 values);
 	void setMatrix4(const std::string& name, glm::mat4 matrix);
 
 
