@@ -96,133 +96,109 @@ static const unsigned int g_indices_data[]{
 
 static const glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(0.0f,  12.5f, 0.0f)
+	glm::vec3(0.0f,  15.0f, 0.0f),
+	glm::vec3(0.0f,	 26.0f, 0.0f)
 	//现在蜡烛的顶点为（0，25，0）
 };
 
 static const glm::vec3 cubeScaling[] = {
 	glm::vec3(25.0f,5.0f,20.0f),
-	glm::vec3(3.0f,10.0f,3.0f)
+	glm::vec3(3.0f,10.0f,3.0f),
+	glm::vec3(1.0f,1.0f,1.0f)
 };
 
 GLuint deskVbo, deskVao, deskEbo, deskColorVbo, deskPosVbo, deskUvVbo;
 GLuint candleVbo, candleVao, candleEbo, candleColorVbo, candlePosVbo, candleUvVbo;
+GLuint lightVbo, lightVao, lightEbo, lightColorVbo, lightPosVbo, lightUvVbo;
+
 Shader triShader;
 Shader candleShader;
+Shader lightShader;
+
 Texture* textureDesk = nullptr;
 Texture* textureCandle = nullptr;
+Texture* textureLight = nullptr;
+
 Camera cam;
 
 Point2D curMousePoint; // cur mouse point
 Point2D lastMousePoint; // last mouse point
 
 float angle = 0.0f;
+
 glm::mat4 transformDesk(1.0f);
 glm::mat4 transformCandle(1.0f);
+glm::mat4 transformLight(1.0f);
+
+
 glm::mat4 viewMat(1.0f);
 glm::mat4 projMat(1.0f);
 
 
-void doTransform() {
-	time_t currenttime = time(NULL);	
-	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 0.0, 1.0));//绕z轴旋转
-	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
-	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
+//创建物体Vao
 
-}
+void prepareLightVao() {
 
 
-void render() {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	float colors[] = {
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+	};
 
-	// use the shader
-	glUseProgram(triShader.getProgId());
 
-	triShader.setInt("sampler",0);//前往0号纹理单元读取数据
-	//triShader.setInt("sampler", 1);//前往1号纹理单元读取数据，由于1号纹理单元没有挂载对象，渲染为黑色
-	
-	triShader.setMatrix4("view", cam.getViewMatrix());
-	triShader.setMatrix4("projection", cam.getProjMatrix());
-	triShader.setMatrix4("transform", transformDesk);
 
-	glBindVertexArray(deskVao);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	//解绑
+
+
+	//2 创建vbo
+	glGenBuffers(1, &lightPosVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, lightPosVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+	/*glGenBuffers(1, &lightColorVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, lightColorVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);*/
+
+	/*
+	glGenBuffers(1, &lightUvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, lightUvVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+	*/
+
+	//3	创建 ebo
+	glGenBuffers(1, &lightEbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightEbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_indices_data), g_indices_data, GL_STATIC_DRAW);
+
+	//4 创建vao
+	glGenVertexArrays(1, &lightVao);
+	glBindVertexArray(lightVao);
+	// 5绑定vbo，ebo 加入描述信息
+	glBindBuffer(GL_ARRAY_BUFFER, lightPosVbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	/*glBindBuffer(GL_ARRAY_BUFFER, lightColorVbo);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);*/
+
+	/*
+	glBindBuffer(GL_ARRAY_BUFFER, lightUvVbo);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	*/
+
+
+	//5.2 加入ebo 到vao中
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightEbo);
+
 	glBindVertexArray(0);
-
-
-	candleShader.setInt("sampler", 1);//前往0号纹理单元读取数据
-
-	candleShader.setMatrix4("view", cam.getViewMatrix());
-	candleShader.setMatrix4("projection", cam.getProjMatrix());
-	candleShader.setMatrix4("transform", transformCandle);
-
-
-	glBindVertexArray(candleVao);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-
-	//for (unsigned int i = 0; i < 2; i++)
-	//{
-	//	// calculate the model matrix for each object and pass it to shader before drawing
-	//	//
-	//	transformDesk = glm::mat4(1.0f);
-	//	transformDesk = glm::translate(transformDesk, cubePositions[i]);
-	//	transformDesk = glm::scale(transformDesk, cubeScaling[i]);
-
-	//	triShader.setMatrix4("transform", transformDesk);
-
-	//	
-	//}
-	
-
-	glutSwapBuffers();
-
 }
-
-
-
-
-
-
-int readCode(char * fileName, char **shaderCode, int *codeLength)
-{
-   int length = 0;
-   FILE *fp = NULL;
-   int rc = 0;
-	// check for error in file name
-    fp = fopen(fileName, "r");	// open file and check for errors
-    if ( fp == NULL ) {
-		rc = -1; 
-		goto err;
-	}
-
-     // find the length of code
-    fseek(fp, 0L, SEEK_END); 
-    length = ftell(fp);
-    rewind(fp);		// could use fseek(fp, 0L, SEEK_SET)
-	if (length <= 0) {
-		rc = -2;
-		goto err;
-	}
-
-    if (length > 0) {
-		// allocated space for code and check for errors
-		*shaderCode = (char *) malloc(length+1);	// add a space for the '\0'
-		if (*shaderCode == NULL) return(-2);
-		memset((void *) *shaderCode, 0, length+1);
-		fread((void *) *shaderCode, sizeof(char), length, fp);
-		(*shaderCode)[length] = 0;
-     }
-
-	if (codeLength != NULL) *codeLength = length;
-
-err:
-	if (fp != NULL) fclose(fp);
-
-	return(rc);
-}
-
 
 void prepareDeskVao() {
 
@@ -298,6 +274,8 @@ void prepareCandleVao() {
 	};
 
 
+
+
 	//2 创建vbo
 	glGenBuffers(1, &candlePosVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, candlePosVbo);
@@ -360,7 +338,9 @@ void prepareCandleTexture() {
 	textureCandle = new Texture("candle.png", 1);
 }
 
-
+void prepareLightTexture() {
+	textureLight = new Texture("light.jpg", 2);
+}
 
 //相机相关：
 void prepareCamera() {
@@ -378,50 +358,22 @@ void prepareProjection() {
 }
 
 
-void update(int value) {
-	angle = 0.01f; // 增加旋转角度
-	doTransform();
-	glutPostRedisplay(); // 标记窗口需要重新绘制
-	glutTimerFunc(16, update, 0); // 每16毫秒调用一次update函数
-}
-
-
-void specialKeyboard(int key, int x, int y)
-{
-	switch (key) {
-	case 033:
-	case 'Q':
-	case 'q':
-		exit(1);
-		break;
-	case GLUT_KEY_LEFT:
-		break;
-	case GLUT_KEY_UP:
-		
-		break;
-	case GLUT_KEY_RIGHT:
-		
-		break;
-	case GLUT_KEY_DOWN:
-		
-		break;
-	}
-}
-
 
 void setObjects() {
 
 	transformDesk = glm::translate(transformDesk, cubePositions[0]);
 	transformCandle = glm::translate(transformCandle, cubePositions[1]);
-
+	transformLight = glm::translate(transformLight, cubePositions[2]);
 
 
 	transformDesk = glm::scale(transformDesk, cubeScaling[0]);
 	transformCandle = glm::scale(transformCandle, cubeScaling[1]);
+	transformLight = glm::scale(transformLight, cubeScaling[2]);
 
 }
 
 
+//鼠标。键盘控制相关：
 
 void mymouse(int button, int state, int x, int y)
 {
@@ -439,9 +391,6 @@ void mymouse(int button, int state, int x, int y)
 
 }
 
-
-
-/**********************************************************************************************/
 void myMotion(int x, int y)
 {
 	static int posX = 0, posY = 0;
@@ -451,20 +400,20 @@ void myMotion(int x, int y)
 	//if y -- yaw --
 	if (lastMousePoint.x < x) {
 		printf("pitch +\n");
-		cam.rotateYaw(-0.10f);
+		cam.rotateYaw(-0.30f);
 	
 	}else if(lastMousePoint.x > x) {
 		printf("pitch -\n");
-		cam.rotateYaw(0.10f);
+		cam.rotateYaw(0.30f);
 
 	}
 	else if (lastMousePoint.y < y) {
 		printf("yaw+\n");
-		cam.rotatePitch(-0.10f);
+		cam.rotatePitch(-0.30f);
 	}
 	else if (lastMousePoint.y > y) {
 		printf("yaw -\n");
-		cam.rotatePitch(0.10f);
+		cam.rotatePitch(0.30f);
 	}
 	lastMousePoint.x = x;
 	lastMousePoint.y = y;
@@ -492,6 +441,114 @@ void mywheel(int wheel, int direction, int x, int y) {
 
 }
 
+
+//初始化
+int readCode(char* fileName, char** shaderCode, int* codeLength)
+{
+	int length = 0;
+	FILE* fp = NULL;
+	int rc = 0;
+	// check for error in file name
+	fp = fopen(fileName, "r");	// open file and check for errors
+	if (fp == NULL) {
+		rc = -1;
+		goto err;
+	}
+
+	// find the length of code
+	fseek(fp, 0L, SEEK_END);
+	length = ftell(fp);
+	rewind(fp);		// could use fseek(fp, 0L, SEEK_SET)
+	if (length <= 0) {
+		rc = -2;
+		goto err;
+	}
+
+	if (length > 0) {
+		// allocated space for code and check for errors
+		*shaderCode = (char*)malloc(length + 1);	// add a space for the '\0'
+		if (*shaderCode == NULL) return(-2);
+		memset((void*)*shaderCode, 0, length + 1);
+		fread((void*)*shaderCode, sizeof(char), length, fp);
+		(*shaderCode)[length] = 0;
+	}
+
+	if (codeLength != NULL) *codeLength = length;
+
+err:
+	if (fp != NULL) fclose(fp);
+
+	return(rc);
+}
+
+void render() {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// use the shader
+	glUseProgram(triShader.getProgId());
+
+	triShader.setInt("sampler", 0);//前往0号纹理单元读取数据
+	triShader.setMatrix4("view", cam.getViewMatrix());
+	triShader.setMatrix4("projection", cam.getProjMatrix());
+	triShader.setMatrix4("transform", transformDesk);
+
+	glBindVertexArray(deskVao);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	//解绑
+	glBindVertexArray(0);
+
+
+
+	//candle shader 
+
+	glUseProgram(candleShader.getProgId());
+
+	candleShader.setInt("sampler", 1);//前往0号纹理单元读取数据
+
+	candleShader.setMatrix4("view", cam.getViewMatrix());
+	candleShader.setMatrix4("projection", cam.getProjMatrix());
+	candleShader.setMatrix4("transform", transformCandle);
+
+
+	glBindVertexArray(candleVao);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+
+
+	//light shader
+
+	glUseProgram(lightShader.getProgId());
+
+	lightShader.setMatrix4("view", cam.getViewMatrix());
+	lightShader.setMatrix4("projection", cam.getProjMatrix());
+	lightShader.setMatrix4("transform", transformLight);
+
+	glBindVertexArray(lightVao);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+
+	glutSwapBuffers();
+
+}
+
+void doTransform() {
+	time_t currenttime = time(NULL);
+	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 0.0, 1.0));//绕z轴旋转
+	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
+	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
+
+}
+
+void update(int value) {
+	angle = 0.01f; // 增加旋转角度
+	doTransform();
+	glutPostRedisplay(); // 标记窗口需要重新绘制
+	glutTimerFunc(16, update, 0); // 每16毫秒调用一次update函数
+}
+
 int initOpenGL()
 {
 	int rc = 0;
@@ -499,7 +556,7 @@ int initOpenGL()
 	glutInitWindowSize(800, 600);
 	glutInitWindowPosition(50, 50);
 	glutCreateWindow("Sence Generation");
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glutDisplayFunc(render);
 
@@ -535,16 +592,18 @@ int main(int argc, char** argv)
 	//creating Objects
 	prepareDeskVao();
 	prepareCandleVao();
+	prepareLightVao();
 
 	//set object positions
 	setObjects();
 	//prepare shader + textures
 	prepareDeskTexture();
 	prepareCandleTexture();
+	//prepareLightTexture();
 
 	//prepare camera attrib
 	prepareCamera();
-	prepareProjection();
+	//prepareProjection();
 
 
 	//create shader obj
@@ -562,7 +621,13 @@ int main(int argc, char** argv)
 		getchar();
 		return(1);
 	}
-	
+	rc = lightShader.createShaderProgram("light.vs", "light.fs");
+	if (rc != 0) {
+		printf("Error in create Shader \n");
+		printf("Hit <cr> to terminate program \n");
+		getchar();
+		return(1);
+	}
 
     glutMainLoop();
 

@@ -23,6 +23,8 @@
     <ClInclude Include="texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="light.fs" />
+    <None Include="light.vs" />
     <None Include="tri.fs" />
     <None Include="tri.vs" />
   </ItemGroup>

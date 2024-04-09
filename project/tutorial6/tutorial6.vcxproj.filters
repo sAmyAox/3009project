@@ -46,5 +46,11 @@
     <None Include="tri.fs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="light.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="light.fs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

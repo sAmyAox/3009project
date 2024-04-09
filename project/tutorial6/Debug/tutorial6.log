@@ -1,3 +1,6 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (tutorial6.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  camera.cpp
+  main.cpp
+D:\3009\project\project\tutorial6\main.cpp(418,21): warning C4244: '=': conversion from 'int' to 'GLfloat', possible loss of data
+D:\3009\project\project\tutorial6\main.cpp(419,21): warning C4244: '=': conversion from 'int' to 'GLfloat', possible loss of data
+D:\3009\project\project\tutorial6\main.cpp(452,7): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   tutorial6.vcxproj -> D:\3009\project\project\Debug\project.exe
