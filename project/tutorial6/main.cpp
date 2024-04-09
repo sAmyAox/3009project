@@ -3,6 +3,7 @@
 #include "texture.h"
 #include "shader.h"
 #include "camera.h"
+//#include "ShadowMap_FBO.h"
 
 typedef struct point2D {
 	GLfloat x, y;
@@ -107,40 +108,60 @@ static const unsigned int g_indices_data[]{
 };
 
 static const glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(0.0f,  15.0f, 0.0f),
-	glm::vec3(0.0f,	 25.5f, 0.0f)
+	glm::vec3(0.0f,  0.0f,  0.0f),//table
+	glm::vec3(0.0f,  15.0f, 0.0f),//candle
+	glm::vec3(0.0f,	 25.5f, 0.0f),//lightSrc
+	glm::vec3(20.0f, 7.5f, 0.0f), //addtional cube position
+	glm::vec3(20.0f, 7.5f, 20.0f), //addtional cube position
+	glm::vec3(40.0f, 7.5f, 10.0f),//addtional cube position
+	glm::vec3(0.0f,  50.0f, 0.0f) //addtional cube position
+
+
 	//现在蜡烛的顶点为（0，25，0）
 };
 
 static const glm::vec3 cubeScaling[] = {
 	glm::vec3(100.0f,10.0f,60.0f),
 	glm::vec3(6.0f,20.0f,6.0f),
-	glm::vec3(1.0f,1.0f,1.0f)
+	glm::vec3(1.0f,1.0f,1.0f),
+	glm::vec3(5.0f,5.0f,5.0f)
 };
 
 GLuint deskVbo, deskVao, deskEbo, deskNormalVbo, deskPosVbo, deskUvVbo;
 GLuint candleVbo, candleVao, candleEbo, candleNormalVbo, candlePosVbo, candleUvVbo;
 GLuint lightVbo, lightVao, lightEbo, lightNormalVbo, lightPosVbo, lightUvVbo;
 
+//ShadowMap_FBO m_shadowMapFBO;
+
 Shader triShader;
 Shader candleShader;
 Shader lightShader;
+Shader shadowShader;
 
 Texture* textureDesk = nullptr;
 Texture* textureCandle = nullptr;
 Texture* textureLight = nullptr;
+Texture* textureShadow = nullptr;
 bool marker = true;
+bool lightSwitch = true;
 Camera cam;
+
+
 
 Point2D curMousePoint; // cur mouse point
 Point2D lastMousePoint; // last mouse point
 
 float angle = 0.0f;
+float clearColour[4] = { 1.0,1.0,1.0,1.0 };
 
 glm::mat4 transformDesk(1.0f);
 glm::mat4 transformCandle(1.0f);
 glm::mat4 transformLight(1.0f);
+glm::mat4 transformCube1(1.0f);
+glm::mat4 transformCube2(1.0f);
+glm::mat4 transformCube3(1.0f);
+glm::mat4 transformCube4(1.0f);
+
 
 
 glm::mat4 viewMat(1.0f);
@@ -308,6 +329,7 @@ void prepareLightTexture() {
 	textureLight = new Texture("light.jpg", 2);
 }
 
+
 //相机相关：
 void prepareCamera() {
 
@@ -330,12 +352,19 @@ void setObjects() {
 	transformDesk = glm::translate(transformDesk, cubePositions[0]);
 	transformCandle = glm::translate(transformCandle, cubePositions[1]);
 	transformLight = glm::translate(transformLight, cubePositions[2]);
+	transformCube1 = glm::translate(transformCube1, cubePositions[3]);
+	transformCube2 = glm::translate(transformCube2, cubePositions[4]);
+	transformCube3 = glm::translate(transformCube3, cubePositions[5]);
+	transformCube4 = glm::translate(transformCube4, cubePositions[6]);
 
 
 	transformDesk = glm::scale(transformDesk, cubeScaling[0]);
 	transformCandle = glm::scale(transformCandle, cubeScaling[1]);
 	transformLight = glm::scale(transformLight, cubeScaling[2]);
-
+	transformCube1 = glm::scale(transformCube1, cubeScaling[3]);
+	transformCube2 = glm::scale(transformCube2, cubeScaling[3]);
+	transformCube3 = glm::scale(transformCube3, cubeScaling[3]);
+	transformCube4 = glm::scale(transformCube4, cubeScaling[3]);
 }
 
 
@@ -447,8 +476,11 @@ err:
 	return(rc);
 }
 
-void render() {
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+
+
+void lightRender() {
+	//glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// use the shader
@@ -465,6 +497,19 @@ void render() {
 
 	glBindVertexArray(deskVao);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+
+
+	triShader.setMatrix4("transform", transformCube1);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	triShader.setMatrix4("transform", transformCube2);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	triShader.setMatrix4("transform", transformCube3);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	triShader.setMatrix4("transform", transformCube4);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
 	//解绑
 	glBindVertexArray(0);
 
@@ -503,8 +548,43 @@ void render() {
 
 	glBindVertexArray(0);
 
-	glutSwapBuffers();
 
+
+
+	//shadows
+
+
+
+	//glutSwapBuffers();
+}
+
+void shadowRender() {
+	//m_shadowMapFBO.BindForWriting();
+	//glClear(GL_DEPTH_BUFFER_BIT);
+
+	//glUseProgram(shadowShader.getProgId());
+	//GLfloat near_plane = 1.0f, far_plane = 7.5f;
+	//glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+	//glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+	//shadowShader.setMatrix4("lightSpaceMatrix", lightSpaceMatrix);
+
+	////glViewport(0, 0, m_shadowMapFBO.mWidth, m_shadowMapFBO.mHeight);
+	//m_shadowMapFBO.BindForWriting();
+	////glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBO);
+	//glClear(GL_DEPTH_BUFFER_BIT);
+	//m_shadowMapFBO.BindForReading(0);
+	//renderScene(simpleDepthShader);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void render() {
+	shadowRender();
+	lightRender();
+
+	glutSwapBuffers();
+	
 }
 
 void doTransform() {
@@ -512,30 +592,31 @@ void doTransform() {
 	//transform = glm::rotate(transform, angle, glm::vec3(0.0, 0.0, 1.0));//绕z轴旋转
 	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(1.0, 0.0, 0.0));//绕x轴旋转
 	//transformDesk = glm::rotate(transformDesk, angle, glm::vec3(0.0, 1.0, 0.0));//绕y轴旋转
-	
-	if (marker == true) {
-		lightColor.r -= 0.01f;
-		lightColor.g -= 0.01f;
-		lightColor.b -= 0.01f;
-		if (lightColor.r <= 0.4f){
-			marker = false;
+	if (lightSwitch == true) {
+		if (marker == true) {
+			lightColor.r -= 0.01f;
+			lightColor.g -= 0.01f;
+			lightColor.b -= 0.01f;
+			if (lightColor.r <= 0.4f) {
+				marker = false;
+			}
+			printf("current color float: %f\n", lightColor.r);
+
 		}
-		printf("current color float: %f\n", lightColor.r);
-
-	}
-	else if(marker == false){
-		lightColor.r += 0.01f;
-		lightColor.g += 0.01f;
-		lightColor.b += 0.01f;
-		if (lightColor.r >= 0.99f) {
-			marker = true;
+		else if (marker == false) {
+			lightColor.r += 0.01f;
+			lightColor.g += 0.01f;
+			lightColor.b += 0.01f;
+			if (lightColor.r >= 0.99f) {
+				marker = true;
+			}
+			printf("current color float: %f\n", lightColor.r);
 		}
-		printf("current color float: %f\n", lightColor.r);
 	}
+	else {
+		lightColor = glm::vec3(1.0f,1.0f,1.0f);
 	
-
-
-
+	}
 }
 
 void update(int value) {
@@ -548,12 +629,150 @@ void update(int value) {
 	glutPostRedisplay(); // 标记窗口需要重新绘制
 }
 
+
+
+#define MAIN_MENU_WIRE 1
+#define MAIN_MENU_QUIT 2
+#define MAIN_MENU_LUMIOSITY 3
+#define MAIN_MENU_FILL 101
+#define MAIN_MENU_MOVERIGHT 102
+#define MAIN_MENU_MOVELEFT 103
+#define MAIN_MENU_LUMIOSITYFALSE 104
+#define MAIN_MENU_MOVEUP 105
+#define MAIN_MENU_MOVEDOWN 106
+
+
+void mainMenuCB(int id)
+{
+	switch (id) {
+	case MAIN_MENU_WIRE:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glutPostRedisplay();
+		break;
+
+	case MAIN_MENU_FILL:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glutPostRedisplay();
+		break;
+
+	case MAIN_MENU_LUMIOSITY:
+		lightSwitch = false;
+		glutPostRedisplay();
+		break;
+
+	case MAIN_MENU_LUMIOSITYFALSE:
+		lightSwitch = true;
+		glutPostRedisplay();
+		break;
+
+
+	case MAIN_MENU_MOVEUP:
+		transformCandle = glm::translate(transformCandle, glm::vec3(0.0f, 1.0f, 0.0f));
+		transformLight = glm::translate(transformLight, glm::vec3(0.0f, 1.0f*20.0f, 0.0f));
+		lightPos = lightPos + glm::vec3(0.0f, 20.0f, 0.0f);
+		glutPostRedisplay();
+		break;
+
+	case MAIN_MENU_MOVEDOWN:
+		transformCandle = glm::translate(transformCandle, glm::vec3(0.0f, -1.0f, 0.0f));
+		transformLight = glm::translate(transformLight, glm::vec3(0.0f, -1.0f * 20.0f, 0.0f));
+		lightPos = lightPos + glm::vec3(0.0f, -20.0f, 0.0f);
+		glutPostRedisplay();
+		break;
+
+
+
+
+	case MAIN_MENU_MOVERIGHT:
+		transformCandle = glm::translate(transformCandle, glm::vec3(1.0f, 0.0f, 0.0f));
+		transformLight = glm::translate(transformLight, glm::vec3(1.0f*6.0f, 0.0f, 0.0f));
+		lightPos = lightPos + glm::vec3(1.0f * 6.0f, 0.0f, 0.0f);
+		glutPostRedisplay();
+		break;
+
+
+	case MAIN_MENU_MOVELEFT:
+		transformCandle = glm::translate(transformCandle, glm::vec3(-1.0f, 0.0f, 0.0f));
+		transformLight = glm::translate(transformLight, glm::vec3(-1.0f * 6.0f, 0.0f, 0.0f));
+		lightPos = lightPos + glm::vec3(-1.0f * 6.0f, 0.0f, 0.0f);
+		glutPostRedisplay();
+		break;
+	case MAIN_MENU_QUIT:
+		exit(0);
+		break;
+
+	default:
+		printf("menu items undefined!! id = %d \n", id);
+		break;
+	}
+}
+
+
+#define SUB_MENU_RED_BG 8
+#define SUB_MENU_WHITE_BG 7
+#define SUB_MENU_GREY_BG 99
+void subMenuCB(int id)
+{
+
+	switch (id) {
+	case SUB_MENU_RED_BG:
+
+		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+		glutPostRedisplay();
+		break;
+
+	case SUB_MENU_WHITE_BG:
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glutPostRedisplay();
+		break;
+
+	case SUB_MENU_GREY_BG:
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glutPostRedisplay();
+		break;
+
+	default:
+		printf("menu items undefined!! id = %d \n", id);
+		break;
+	}
+}
+
+
+void createMenu()
+{
+
+	int optionSubmenu = glutCreateMenu(subMenuCB);
+	glutAddMenuEntry("Red", SUB_MENU_RED_BG);
+	glutAddMenuEntry("White", SUB_MENU_WHITE_BG);
+	glutAddMenuEntry("Grey", SUB_MENU_GREY_BG);
+
+
+
+
+	int menu = glutCreateMenu(mainMenuCB);
+	glutAddMenuEntry("enable wireframe", MAIN_MENU_WIRE);
+	glutAddMenuEntry("disable wireframe", MAIN_MENU_FILL);
+	glutAddMenuEntry("Change lumiosity to 1.0", MAIN_MENU_LUMIOSITY);
+	glutAddMenuEntry("Change lumiosity via time", MAIN_MENU_LUMIOSITYFALSE);
+	glutAddMenuEntry("move candle along x with +1", MAIN_MENU_MOVERIGHT);
+	glutAddMenuEntry("move candle along x with -1", MAIN_MENU_MOVELEFT);
+	glutAddMenuEntry("move candle along y with +1", MAIN_MENU_MOVEUP);
+	glutAddMenuEntry("move candle along Y with -1", MAIN_MENU_MOVEDOWN);
+
+	glutAddSubMenu("Set BG colour ", optionSubmenu);
+	glutAttachMenu(GLUT_MIDDLE_BUTTON);
+	glutAddMenuEntry("Exit", MAIN_MENU_QUIT);
+
+}
+
+
 int initOpenGL()
 {
 	int rc = 0;
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowSize(800, 600);
 	glutInitWindowPosition(50, 50);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glutCreateWindow("Sence Generation");
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -599,6 +818,7 @@ int main(int argc, char** argv)
 	prepareDeskVao();
 	prepareCandleVao();
 	prepareLightVao();
+	//prepareShadow();
 
 	//set object positions
 	setObjects();
@@ -634,7 +854,7 @@ int main(int argc, char** argv)
 		getchar();
 		return(1);
 	}
-
+	createMenu();
     glutMainLoop();
 
     return 0;

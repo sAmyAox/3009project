@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="ShadowMap_FBO.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -20,6 +21,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="includPath.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="ShadowMap_FBO.h" />
     <ClInclude Include="texture.h" />
   </ItemGroup>
   <ItemGroup>
