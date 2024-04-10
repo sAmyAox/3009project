@@ -7,6 +7,7 @@ out vec3 normal;
 uniform mat4 transform;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 lightColor;
 
 void main()
 {

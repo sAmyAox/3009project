@@ -74,10 +74,10 @@ void Camera::rotatePitch(float angle) {
 
 
 	glm::vec4 result = rotMat * glm::vec4(upVector,1.0f);
-	upVector = glm::vec3(upVector.x, upVector.y, upVector.z);
+	upVector = glm::vec3(result.x, result.y, result.z);
 
 	result = rotMat * glm::vec4(lookAtVector, 1.0f);
-	lookAtVector = glm::vec3(lookAtVector.x, lookAtVector.y, lookAtVector.z);
+	lookAtVector = glm::vec3(result.x, result.y, result.z);
 }
 
 void Camera::rotateYaw(float angle) {
@@ -88,7 +88,7 @@ void Camera::rotateYaw(float angle) {
 	viewMat = glm::rotate(viewMat, angleRadians, rotVector);
 
 	glm::vec4 result = rotMat * glm::vec4(lookAtVector, 1.0f);
-	lookAtVector = glm::vec3(lookAtVector.x, lookAtVector.y, lookAtVector.z);
+	lookAtVector = glm::vec3(result.x, result.y, result.z);
 
 }
 

@@ -12,6 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="Emitter.cpp" />
+    <ClCompile Include="particle.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="ShadowMap_FBO.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -19,7 +21,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="Emitter.h" />
     <ClInclude Include="includPath.h" />
+    <ClInclude Include="particle.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="ShadowMap_FBO.h" />
     <ClInclude Include="texture.h" />
@@ -27,6 +31,8 @@
   <ItemGroup>
     <None Include="light.fs" />
     <None Include="light.vs" />
+    <None Include="particle.fs" />
+    <None Include="particle.vs" />
     <None Include="tri.fs" />
     <None Include="tri.vs" />
   </ItemGroup>

@@ -27,6 +27,12 @@
     <ClCompile Include="ShadowMap_FBO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="particle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Emitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -44,6 +50,12 @@
     <ClInclude Include="ShadowMap_FBO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Emitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="tri.vs">
@@ -56,6 +68,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="light.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="particle.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="particle.vs">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

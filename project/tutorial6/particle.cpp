@@ -1,110 +1,63 @@
 #include "particle.h"
-void Particle::LoadPartTexture() {
-	PartTexture = new Texture("particle.png", 1);
+
+Particle::Particle(glm::vec3 loc) {
+	location = loc;
+
+	velocity = glm::vec3(0.03, 0.03, 0.03);
+	color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	lifespan = 20.0f * random(1.0, 1.5);
 }
 
-void Particle::InitalPart() {
-	LoadPartTexture();
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+void Particle::update() {
+	float x_acc = 0.4f * random(1.0, 0.1);
+	float y_acc = 0.4f * random(1.0, 0.1);
+	float z_acc = 0.4f * random(1.0, 0.1);
+	printf("x_acc = %f, y_acc = %f,z_acc = %f\n", x_acc, y_acc, z_acc);
+	acceleration = glm::vec3(x_acc, y_acc, z_acc);
 
-	for (int i=0; i < MAX_PARTICLES; i++)
-	{
-		part[i].active = true;
-		part[i].life = 1.0f;
-		part[i].fade = float(rand() % 100) / 1000.0f + 0.003f;
-		part[i].r = white[0];
-		part[i].g = white[1];
-		part[i].b = white[2];
-		part[i].xi = float((rand() % 50) - 25.0f) * 10.0f;
-		part[i].yi = float((rand() % 50) - 25.0f) * 10.0f;
-		part[i].zi = float((rand() % 50) - 25.0f) * 10.0f;
-		part[i].xg = 0.0f;
-		part[i].yg = 0.8f;
-		part[i].zg = 0.0f;
+	velocity += acceleration;
+	location += velocity;
+	printf("velocity = (%f,%f,%f)\n", velocity.x, velocity.y, velocity.z);
+	printf("location = (%f,%f,%f)\n", location.x, location.y, location.z);
+	lifespan -= 0.7f;
+	printf("lifespam = %f\n",lifespan);
+	printf("color.r = %f\n", color.r);
+	printf("color.g = %f\n", color.g);
+	printf("color.b = %f\n", color.b);
+	printf("color.a = %f\n", color.a);
+
+}
+
+bool Particle::isDead() {
+	if (lifespan < 0.0) {
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 
-void Particle::DrawPart() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-	for (int i = 0; i < MAX_PARTICLES; i++)
-	{
-		if (part[i].active)
-		{
+float Particle::random(float upper, float lower) {
+	float range = (upper - lower);
+	float random_float = lower + (range * ((float)rand()) / (RAND_MAX));
+	printf("random_float = %f\n", random_float);
+	return random_float;
+}
+glm::vec3 Particle::getPosition() {
+	return location;
+}
 
-			float x = part[i].x;
-			float y = part[i].y;
-			float z = part[i].z + zoom;
-			glColor4f(part[i].r, part[i].g, part[i].b, part[i].life);
+float Particle::getLifespan() {
+	return lifespan;
+}
 
-			glBegin(GL_TRIANGLE_STRIP);
-			glTexCoord2d(1, 1); glVertex3f(x + 0.5f, y + 0.5f, z);
-			glTexCoord2d(0, 1); glVertex3f(x - 0.5f, y + 0.5f, z);
-			glTexCoord2d(1, 0); glVertex3f(x + 0.5f, y - 0.5f, z);
-			glTexCoord2d(0, 0); glVertex3f(x - 0.5f, y - 0.5f, z);
-			glEnd();
+glm::vec4 Particle::getColor() {
+	return color;
+}
 
-			part[i].x += part[i].xi / (750);
-			part[i].y += part[i].yi / (1000);
-			part[i].z += part[i].zi / (750);
-			if ((part[i].x > posX) && (part[i].y > (0.1 + posY))) {
-				part[i].xg = -0.3f;
-			}
-			else if ((part[i].x < posX) && (par[i].y > (0.1 + posY))) {
-				part[i].xg = 0.3f;
-			}
-			else {
-				part[i].xg = 0.0f;
-			}
-
-			part[i].xi += (part[i].xg + gravX);
-			part[i].yi += (part[i].yg + gravY);
-			part[i].zi += (part[i].zg + gravZ);
-			part[i].life -= particle[loop].fade;
-
-			if (part[i].life < 0.0f)
-			{
-				part[i].life = 1.0f;
-				part[i].fade = float(rand() % 100) / 1000.0f + 0.003f;
-				part[i].x = posX;
-				part[i].y = posY;
-				part[i].z = posZ;
-				part[i].xi = float((rand() % 60) - 30.0f);
-				part[i].yi = float((rand() % 60) - 30.0f);
-				part[i].zi = float((rand() % 60) - 30.0f);
-				part[i].r = white[0];
-				part[i].g = white[1];
-				part[i].b = white[2];
-			}
-			else if (part[i].life < 0.4f)
-			{
-				part[i].r = red[0];
-				part[i].g = red[1];
-				part[i].b = red[2];
-			}
-			else if (part[i].life < 0.6f)
-			{
-				part[i].r = orange[0];
-				part[i].g = orange[1];
-				part[i].b = orange[2];
-			}
-			else if (part[i].life < 0.75f)
-			{
-				part[i].r = yellow[0];
-				part[i].g = yellow[1];
-				part[i].b = yellow[2];
-			}
-			else if (part[i].life < 0.85f)
-			{
-				part[i].r = blue[0];
-				part[i].g = blue[1];
-				part[i].b = blue[2];
-			}
-		}
-	}
-	glutPostRedisplay();
-	glutSwapBuffers();
+void Particle::kill() {
+	lifespan = 0.0;
+}
+glm::vec3 Particle::getAcceleration() {
+	return acceleration;
 }

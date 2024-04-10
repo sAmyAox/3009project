@@ -3,12 +3,11 @@
 #include "texture.h"
 #include "shader.h"
 #include "camera.h"
-//#include "ShadowMap_FBO.h"
+#include "Emitter.h"
 
 typedef struct point2D {
 	GLfloat x, y;
 } Point2D;
-
 
 //globals
 glm::vec3 lightPos = glm::vec3(0.0f, 25.5f, 0.0f);
@@ -130,14 +129,10 @@ static const glm::vec3 cubeScaling[] = {
 GLuint deskVbo, deskVao, deskEbo, deskNormalVbo, deskPosVbo, deskUvVbo;
 GLuint candleVbo, candleVao, candleEbo, candleNormalVbo, candlePosVbo, candleUvVbo;
 GLuint lightVbo, lightVao, lightEbo, lightNormalVbo, lightPosVbo, lightUvVbo;
-
-//ShadowMap_FBO m_shadowMapFBO;
-
 Shader triShader;
 Shader candleShader;
 Shader lightShader;
-Shader shadowShader;
-
+Shader particleShader;
 Texture* textureDesk = nullptr;
 Texture* textureCandle = nullptr;
 Texture* textureLight = nullptr;
@@ -145,15 +140,10 @@ Texture* textureShadow = nullptr;
 bool marker = true;
 bool lightSwitch = true;
 Camera cam;
-
-
-
 Point2D curMousePoint; // cur mouse point
 Point2D lastMousePoint; // last mouse point
-
 float angle = 0.0f;
 float clearColour[4] = { 1.0,1.0,1.0,1.0 };
-
 glm::mat4 transformDesk(1.0f);
 glm::mat4 transformCandle(1.0f);
 glm::mat4 transformLight(1.0f);
@@ -161,12 +151,11 @@ glm::mat4 transformCube1(1.0f);
 glm::mat4 transformCube2(1.0f);
 glm::mat4 transformCube3(1.0f);
 glm::mat4 transformCube4(1.0f);
-
-
-
 glm::mat4 viewMat(1.0f);
 glm::mat4 projMat(1.0f);
 
+float passedTime = 0.0f;
+Emitter* e1;
 
 //创建物体Vao
 
@@ -329,7 +318,6 @@ void prepareLightTexture() {
 	textureLight = new Texture("light.jpg", 2);
 }
 
-
 //相机相关：
 void prepareCamera() {
 
@@ -340,12 +328,6 @@ void prepareCamera() {
 	//cam.viewMat = glm::lookAt(glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	
 }
-
-void prepareProjection() {
-	projMat = glm::perspective(70.0f,0.75f,0.1f,1000.0f);
-}
-
-
 
 void setObjects() {
 
@@ -476,10 +458,7 @@ err:
 	return(rc);
 }
 
-
-
-
-void lightRender() {
+void render() {
 	//glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -542,6 +521,7 @@ void lightRender() {
 	lightShader.setMatrix4("view", cam.getViewMatrix());
 	lightShader.setMatrix4("projection", cam.getProjMatrix());
 	lightShader.setMatrix4("transform", transformLight);
+	lightShader.setVector3("lightColor", lightColor);
 
 	glBindVertexArray(lightVao);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -549,39 +529,12 @@ void lightRender() {
 	glBindVertexArray(0);
 
 
+	//particle
 
-
-	//shadows
-
-
-
-	//glutSwapBuffers();
-}
-
-void shadowRender() {
-	//m_shadowMapFBO.BindForWriting();
-	//glClear(GL_DEPTH_BUFFER_BIT);
-
-	//glUseProgram(shadowShader.getProgId());
-	//GLfloat near_plane = 1.0f, far_plane = 7.5f;
-	//glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	//glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	//glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-	//shadowShader.setMatrix4("lightSpaceMatrix", lightSpaceMatrix);
-
-	////glViewport(0, 0, m_shadowMapFBO.mWidth, m_shadowMapFBO.mHeight);
-	//m_shadowMapFBO.BindForWriting();
-	////glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBO);
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//m_shadowMapFBO.BindForReading(0);
-	//renderScene(simpleDepthShader);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void render() {
-	shadowRender();
-	lightRender();
+	glUseProgram(particleShader.getProgId());
+	//particleShader;
+	e1->render();
+	//Particle p1;
 
 	glutSwapBuffers();
 	
@@ -622,25 +575,13 @@ void doTransform() {
 void update(int value) {
 	angle = 0.01f; // 增加旋转角度
 	doTransform();
+	e1->update();
 
 	//candleShader.setVector3("viewPos", cam.getViewPos());
 	//triShader.setVector3("viewPos", cam.getViewPos());
 	glutTimerFunc(25, update, 0);
 	glutPostRedisplay(); // 标记窗口需要重新绘制
 }
-
-
-
-#define MAIN_MENU_WIRE 1
-#define MAIN_MENU_QUIT 2
-#define MAIN_MENU_LUMIOSITY 3
-#define MAIN_MENU_FILL 101
-#define MAIN_MENU_MOVERIGHT 102
-#define MAIN_MENU_MOVELEFT 103
-#define MAIN_MENU_LUMIOSITYFALSE 104
-#define MAIN_MENU_MOVEUP 105
-#define MAIN_MENU_MOVEDOWN 106
-
 
 void mainMenuCB(int id)
 {
@@ -707,10 +648,6 @@ void mainMenuCB(int id)
 	}
 }
 
-
-#define SUB_MENU_RED_BG 8
-#define SUB_MENU_WHITE_BG 7
-#define SUB_MENU_GREY_BG 99
 void subMenuCB(int id)
 {
 
@@ -736,7 +673,6 @@ void subMenuCB(int id)
 		break;
 	}
 }
-
 
 void createMenu()
 {
@@ -765,7 +701,6 @@ void createMenu()
 
 }
 
-
 int initOpenGL()
 {
 	int rc = 0;
@@ -785,6 +720,10 @@ int initOpenGL()
 	glutTimerFunc(25, update, 0);
 
 	glEnable(GL_DEPTH_TEST);
+	//for particle
+	glEnable(GL_POINTS);
+	//glEnable(GL_PROGRAM_POINT_SIZE);
+	glPointSize(50);
 
 	// Must be done after glut is initialized!
 	GLenum res = glewInit();
@@ -804,9 +743,9 @@ int initOpenGL()
 }
 
 
-
 int main(int argc, char** argv)
 {
+	srand(time(nullptr));
 	int rc = 0;
     glutInit(&argc, argv);
 
@@ -818,18 +757,16 @@ int main(int argc, char** argv)
 	prepareDeskVao();
 	prepareCandleVao();
 	prepareLightVao();
-	//prepareShadow();
 
 	//set object positions
 	setObjects();
+
 	//prepare shader + textures
 	prepareDeskTexture();
 	prepareCandleTexture();
-	//prepareLightTexture();
 
 	//prepare camera attrib
 	prepareCamera();
-	//prepareProjection();
 
 
 	//create shader obj
@@ -837,27 +774,34 @@ int main(int argc, char** argv)
 	if (rc != 0) {
 		printf("Error in create Shader \n");
 		printf("Hit <cr> to terminate program \n");
-		getchar();
 		return(1);
 	}
 	rc = candleShader.createShaderProgram("tri.vs", "tri.fs");
 	if (rc != 0) {
 		printf("Error in create Shader \n");
 		printf("Hit <cr> to terminate program \n");
-		getchar();
 		return(1);
 	}
 	rc = lightShader.createShaderProgram("light.vs", "light.fs");
 	if (rc != 0) {
 		printf("Error in create Shader \n");
 		printf("Hit <cr> to terminate program \n");
-		getchar();
 		return(1);
 	}
+	rc = particleShader.createShaderProgram("particle.vs", "particle.fs");
+	if (rc != 0) {
+		printf("Error in create particle Shader \n");
+		printf("Hit <cr> to terminate program \n");
+		return(1);
+	}
+
+	//particle + emitter
+
+	e1 = new Emitter(glm::vec3(0.0f, 26.0f, 0.0f));
+	e1->createParticles(50);
+
 	createMenu();
     glutMainLoop();
 
     return 0;
 }
-
-
